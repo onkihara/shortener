@@ -29,7 +29,7 @@ class StoreShortenerRequest extends FormRequest
             'hash' => [
                 'nullable',
                 'max:'.config('shortener.hash.max_length', 16),
-                'regex:/^[a-zA-Z0-9_-]+$/',
+                'regex:/^'.config('shortener.hash.allowed').'+$/',
                 'unique:shortcuts,Hash',
             ],
             'description' => [

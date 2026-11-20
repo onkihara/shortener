@@ -52,9 +52,9 @@
                 <tr>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Hash</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">URL</th>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Beschreibung</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Häufigkeit</th>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Erstellt</th>
+                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Veröffentlicht</th>
+                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Ablaufdatum</th>
                     <th class="px-6 py-3 text-right text-sm font-semibold text-gray-700">Aktionen</th>
                 </tr>
             </thead>
@@ -260,24 +260,24 @@
                         ${shortener.Url}
                     </a>
                 </td>
-                <td class="px-6 py-4 text-sm text-gray-700 max-w-xs truncate">
-                    ${shortener.Description || '-'}
-                </td>
                 <td class="px-6 py-4 text-sm text-gray-700 font-semibold">
                     📊 ${shortener.Frequency}
                 </td>
                 <td class="px-6 py-4 text-sm text-gray-600">
-                    ${new Date(shortener.CreationDate).toLocaleDateString('de-DE')}
+                    ${shortener.PublishDate ? new Date(shortener.PublishDate).toLocaleDateString('de-DE') : '-'}
                 </td>
-                <td class="px-6 py-4 text-right text-sm space-x-2">
-                    <button onclick="openEditModal(${shortener.ID}, '${shortener.Hash}', '${shortener.Url.replace(/'/g, "\\'")}', '${(shortener.Description || '').replace(/'/g, "\\'")}', '${formatEditDate(shortener.PublishDate)}', '${formatEditDate(shortener.ExpirationDate)}')"
-                        class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-xs font-semibold">
-                        ✏️ Bearbeiten
-                    </button>
-                    <button onclick="openDeleteModal(${shortener.ID}, '${shortener.Hash}')"
-                        class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition text-xs font-semibold">
-                        🗑️ Löschen
-                    </button>
+                <td class="px-6 py-4 text-sm text-gray-600">
+                    ${shortener.ExpirationDate ? new Date(shortener.ExpirationDate).toLocaleDateString('de-DE') : '-'}
+                </td>
+                <td class="px-6 py-4 text-right text-sm space-x-3">
+                    <a href="#" onclick="openEditModal(${shortener.ID}, '${shortener.Hash}', '${shortener.Url.replace(/'/g, "\\'")}', '${(shortener.Description || '').replace(/'/g, "\\'")}', '${formatEditDate(shortener.PublishDate)}', '${formatEditDate(shortener.ExpirationDate)}'); return false;"
+                        class="text-blue-600 hover:text-blue-800 hover:underline font-semibold">
+                        Bearbeiten
+                    </a>
+                    <a href="#" onclick="openDeleteModal(${shortener.ID}, '${shortener.Hash}'); return false;"
+                        class="text-red-600 hover:text-red-800 hover:underline font-semibold">
+                        Löschen
+                    </a>
                 </td>
             </tr>
         `).join('');

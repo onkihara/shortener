@@ -12,7 +12,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
 </head>
-<body class="min-h-screen bg-[#f7f5ef] text-slate-900 antialiased">
+<body class="min-h-screen bg-[#f7f5ef] text-slate-900 antialiased flex flex-col">
     <header class="border-b border-slate-200 bg-[#FF9900]">
         <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-5 sm:px-8">
             <a href="https://www.blikk.it" class="flex items-center gap-3 font-semibold tracking-tight">
@@ -36,7 +36,7 @@
         </div>
     </header>
 
-    <main class="mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-12">
+    <main class="mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-12 flex-grow">
         @yield('main')
     </main>
 

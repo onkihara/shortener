@@ -19,9 +19,12 @@ class ShortenerController extends Controller
      */
     public function redirect(string $hash, YouTubeConverter $youtubeConverter): RedirectResponse
     {
-        $shortener = Shortener::where('Hash', $hash)
-            ->published()
-            ->firstOrFail();
+        $shortener = Shortener::where('Hash', $hash)->firstOrFail();
+
+        // Check if published
+        if ( ! $shortener->isPublished()) {
+            abort(409);
+        }
 
         // Check if expired
         if ($shortener->isExpired()) {
