@@ -203,6 +203,74 @@ describe('Shortener API', function () {
             expect($response->json('success'))->toBeTrue();
             $this->assertDatabaseHas('shortcuts', ['ID' => $shortener->ID, 'Description' => 'new']);
         });
+
+        test('allows an expiration date on the publish date', function () {
+            $this->travelTo('2026-11-20 10:00:00');
+            $shortener = Shortener::factory()->create([
+                'UserID' => $this->user->id,
+                'PublishDate' => '2026-11-21 00:00',
+                'ExpirationDate' => '2026-11-22 23:59:59',
+            ]);
+
+            $response = $this->actingAs($this->user)
+                ->patch("/api/shorteners/{$shortener->ID}", [
+                    'publish_date' => '2026-11-21 00:00',
+                    'expiration_date' => '2026-11-21 23:59:59',
+                ]);
+
+            $response->assertOk();
+            expect($shortener->fresh()->ExpirationDate->format('Y-m-d H:i:s'))->toBe('2026-11-21 23:59:59');
+        });
+
+        test('rejects an expiration date before the existing publish date', function () {
+            $this->travelTo('2026-11-20 10:00:00');
+            $shortener = Shortener::factory()->create([
+                'UserID' => $this->user->id,
+                'PublishDate' => '2026-11-21 00:00',
+                'ExpirationDate' => '2026-11-22 23:59:59',
+            ]);
+
+            $response = $this->actingAs($this->user)
+                ->patch("/api/shorteners/{$shortener->ID}", [
+                    'expiration_date' => '2026-11-20 23:59:59',
+                ]);
+
+            $response->assertUnprocessable()
+                ->assertJsonValidationErrors('expiration_date');
+        });
+
+        test('allows an expiration date after the existing publish date', function () {
+            $this->travelTo('2026-11-20 10:00:00');
+            $shortener = Shortener::factory()->create([
+                'UserID' => $this->user->id,
+                'PublishDate' => '2026-11-21 00:00',
+                'ExpirationDate' => '2026-11-22 23:59:59',
+            ]);
+
+            $response = $this->actingAs($this->user)
+                ->patch("/api/shorteners/{$shortener->ID}", [
+                    'expiration_date' => '2026-11-23 23:59:59',
+                ]);
+
+            $response->assertOk();
+            expect($shortener->fresh()->ExpirationDate->format('Y-m-d H:i:s'))->toBe('2026-11-23 23:59:59');
+        });
+
+        test('allows clearing the publish date while an expiration date remains', function () {
+            $shortener = Shortener::factory()->create([
+                'UserID' => $this->user->id,
+                'PublishDate' => '2026-11-21 00:00',
+                'ExpirationDate' => '2026-11-22 23:59:59',
+            ]);
+
+            $response = $this->actingAs($this->user)
+                ->patch("/api/shorteners/{$shortener->ID}", [
+                    'publish_date' => null,
+                ]);
+
+            $response->assertOk();
+            expect($shortener->fresh()->PublishDate)->toBeNull();
+        });
     });
 
     describe('DELETE /api/shorteners/{id} - Delete', function () {

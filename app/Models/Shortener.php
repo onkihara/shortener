@@ -157,7 +157,7 @@ class Shortener extends Model
      */
     public function isExpired(): bool
     {
-        return $this->ExpirationDate && $this->ExpirationDate < now();
+        return $this->ExpirationDate && $this->ExpirationDate <= now();
     }
 
     /**

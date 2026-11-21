@@ -38,6 +38,34 @@ describe('Shortener Expiration and Publish Date', function () {
             ->assertRedirect('https://example.com');
     });
 
+    it('allows a publish date in the past', function () {
+        $this->travelTo(Carbon::parse('2026-11-20 12:00:00'));
+
+        $this->postJson(route('shortener.store'), [
+            'url' => 'https://example.com',
+            'hash' => 'past-publish',
+            'publish_date' => '2026-11-19 00:00',
+            'expiration_date' => '2026-11-21 23:59:59',
+        ])
+            ->assertCreated();
+
+        $shortener = Shortener::where('Hash', 'past-publish')->firstOrFail();
+        expect($shortener->PublishDate->format('Y-m-d H:i'))->toBe('2026-11-19 00:00');
+        expect($shortener->ExpirationDate->format('Y-m-d H:i:s'))->toBe('2026-11-21 23:59:59');
+    });
+
+    it('treats a link as expired at the exact expiration time', function () {
+        $this->travelTo(Carbon::parse('2026-11-20 12:00:00'));
+        $shortener = Shortener::factory()->create([
+            'Hash' => 'expires-now',
+            'Url' => 'https://example.com',
+            'ExpirationDate' => '2026-11-20 12:00:00',
+        ]);
+
+        expect($shortener->isExpired())->toBeTrue();
+        $this->get(route('shortener.redirect', $shortener->Hash))->assertStatus(410);
+    });
+
     describe('scopePublished', function () {
         it('includes links without publish date', function () {
             $shortener = Shortener::create([

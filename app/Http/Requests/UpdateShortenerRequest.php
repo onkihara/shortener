@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Validator;
 
 class UpdateShortenerRequest extends FormRequest
 {
@@ -29,12 +31,10 @@ class UpdateShortenerRequest extends FormRequest
             'publish_date' => [
                 'nullable',
                 'date_format:Y-m-d H:i',
-                'after_or_equal:now',
             ],
             'expiration_date' => [
                 'nullable',
-                'date_format:Y-m-d H:i',
-                'after:publish_date',
+                'date_format:Y-m-d H:i:s',
             ],
         ];
     }
@@ -47,9 +47,42 @@ class UpdateShortenerRequest extends FormRequest
         return [
             'description.max' => 'Die Beschreibung darf max. '.config('shortener.description.max_length', 1024).' Zeichen lang sein.',
             'publish_date.date_format' => 'Das Publish-Datum muss das Format YYYY-MM-DD HH:MM haben.',
-            'publish_date.after_or_equal' => 'Das Publish-Datum muss in der Zukunft oder jetzt sein.',
-            'expiration_date.date_format' => 'Das Verfallsdatum muss das Format YYYY-MM-DD HH:MM haben.',
-            'expiration_date.after' => 'Das Verfallsdatum muss nach dem Publish-Datum liegen.',
+            'expiration_date.date_format' => 'Das Verfallsdatum muss das Format YYYY-MM-DD HH:MM:SS haben.',
+        ];
+    }
+
+    public function after(): array
+    {
+        return [
+            function (Validator $validator): void {
+                if (
+                    $validator->errors()->hasAny(['publish_date', 'expiration_date'])
+                ) {
+                    return;
+                }
+
+                $shortener = $this->route('shortener');
+                $publishDate = $this->has('publish_date')
+                    ? $this->input('publish_date')
+                    : $shortener?->PublishDate?->format('Y-m-d H:i');
+                $expirationDate = $this->has('expiration_date')
+                    ? $this->input('expiration_date')
+                    : $shortener?->ExpirationDate?->format('Y-m-d H:i:s');
+
+                if (! $publishDate || ! $expirationDate) {
+                    return;
+                }
+
+                $publish = Carbon::createFromFormat('Y-m-d H:i', $publishDate);
+                $expiration = Carbon::createFromFormat('Y-m-d H:i:s', $expirationDate);
+
+                if ($expiration->lessThan($publish)) {
+                    $validator->errors()->add(
+                        'expiration_date',
+                        'Das Verfallsdatum darf nicht vor dem Publish-Datum liegen.',
+                    );
+                }
+            },
         ];
     }
 }

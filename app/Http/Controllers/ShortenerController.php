@@ -22,7 +22,7 @@ class ShortenerController extends Controller
         $shortener = Shortener::where('Hash', $hash)->firstOrFail();
 
         // Check if published
-        if ( ! $shortener->isPublished()) {
+        if (! $shortener->isPublished()) {
             abort(409);
         }
 
@@ -103,7 +103,7 @@ class ShortenerController extends Controller
                 'Url' => $request->input('url'),
                 'Description' => $request->input('description', ''),
                 'PublishDate' => $request->input('publish_date') ? Carbon::createFromFormat('Y-m-d H:i', $request->input('publish_date')) : null,
-                'ExpirationDate' => $request->input('expiration_date') ? Carbon::createFromFormat('Y-m-d H:i', $request->input('expiration_date')) : null,
+                'ExpirationDate' => $request->input('expiration_date') ? Carbon::createFromFormat('Y-m-d H:i:s', $request->input('expiration_date')) : null,
                 'Frequency' => 0,
                 'CreationDate' => now(),
                 'UpdateDate' => now(),
@@ -120,7 +120,7 @@ class ShortenerController extends Controller
                     'url' => $shortener->Url,
                     'description' => $shortener->Description,
                     'publish_date' => $shortener->PublishDate?->format('Y-m-d H:i'),
-                    'expiration_date' => $shortener->ExpirationDate?->format('Y-m-d H:i'),
+                    'expiration_date' => $shortener->ExpirationDate?->format('Y-m-d H:i:s'),
                     'short_link' => url($shortener->Hash),
                 ],
             ], 201);
@@ -154,7 +154,7 @@ class ShortenerController extends Controller
                 'description' => $shortener->Description,
                 'frequency' => $shortener->Frequency,
                 'publish_date' => $shortener->PublishDate?->format('Y-m-d H:i'),
-                'expiration_date' => $shortener->ExpirationDate?->format('Y-m-d H:i'),
+                'expiration_date' => $shortener->ExpirationDate?->format('Y-m-d H:i:s'),
                 'created_at' => $shortener->CreationDate,
                 'updated_at' => $shortener->UpdateDate,
                 'short_link' => url($shortener->Hash),
@@ -185,7 +185,7 @@ class ShortenerController extends Controller
             }
 
             if ($request->has('expiration_date')) {
-                $updateData['ExpirationDate'] = $request->input('expiration_date') ? Carbon::createFromFormat('Y-m-d H:i', $request->input('expiration_date')) : null;
+                $updateData['ExpirationDate'] = $request->input('expiration_date') ? Carbon::createFromFormat('Y-m-d H:i:s', $request->input('expiration_date')) : null;
             }
 
             $shortener->update($updateData);
@@ -200,7 +200,7 @@ class ShortenerController extends Controller
                     'description' => $shortener->Description,
                     'frequency' => $shortener->Frequency,
                     'publish_date' => $shortener->PublishDate?->format('Y-m-d H:i'),
-                    'expiration_date' => $shortener->ExpirationDate?->format('Y-m-d H:i'),
+                    'expiration_date' => $shortener->ExpirationDate?->format('Y-m-d H:i:s'),
                     'created_at' => $shortener->CreationDate,
                     'updated_at' => $shortener->UpdateDate,
                 ],
