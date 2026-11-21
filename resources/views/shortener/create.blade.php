@@ -1,7 +1,7 @@
 @extends('frame')
 
 @section('main')
-<div class="max-w-xl w-full m-auto">
+<div class="max-w-xl2 m-auto">
     <div class="bg-white shadow-xl p-8">
 
         <!-- Error Messages -->

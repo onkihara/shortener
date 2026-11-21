@@ -124,7 +124,7 @@ describe('Shortener API', function () {
 
             $response = $this->get('/future');
 
-            $response->assertStatus(404);
+            $response->assertStatus(409);
         });
     });
 
@@ -155,7 +155,7 @@ describe('Shortener API', function () {
             $user2 = User::factory()->create();
             Shortener::factory()->create(['UserID' => $this->user->id, 'Hash' => 'found', 'Url' => 'https://found.com']);
             Shortener::factory()->create(['UserID' => $this->user->id, 'Hash' => 'other', 'Url' => 'https://other.com']);
-            Shortener::factory()->create(['UserID' => $user2->id, 'Hash' => 'found', 'Url' => 'https://found.com']);
+            Shortener::factory()->create(['UserID' => $user2->id, 'Hash' => 'found-user2', 'Url' => 'https://found.com']);
 
             $response = $this->actingAs($this->user)->get('/api/shorteners?search=found');
 

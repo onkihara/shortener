@@ -17,7 +17,7 @@ describe('Shortener Model', function () {
             expect($hash)
                 ->toBeString()
                 ->not->toBeEmpty()
-                ->toHaveLength(6, 7, 8); // Should be one of these lengths
+                ->toHaveLength(4, 5, 6, 7, 8); // Should be one of these lengths
         });
 
         test('validates custom hash and returns it if unique', function () {

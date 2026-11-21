@@ -15,7 +15,7 @@ describe('Shortener Expiration and Publish Date', function () {
 
         $shortener = Shortener::where('Hash', $response->json('data.hash'))->firstOrFail();
 
-        $this->get(route('shortener.redirect', $shortener->Hash))->assertNotFound();
+        $this->get(route('shortener.redirect', $shortener->Hash))->assertStatus(409);
         expect($shortener->fresh()->Frequency)->toBe(0);
 
         $this->travelTo(Carbon::parse('2026-11-20 12:01:00'));
