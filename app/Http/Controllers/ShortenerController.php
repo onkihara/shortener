@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreShortenerRequest;
 use App\Http\Requests\UpdateShortenerRequest;
 use App\Models\Shortener;
+use App\Services\QrCodeGenerator;
 use App\Services\YouTubeConverter;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -293,5 +294,42 @@ class ShortenerController extends Controller
                 'description' => $shortener->Description,
             ],
         ]);
+    }
+
+    /**
+     * Generate QR code for a shortener
+     */
+    public function generateQrCode(Request $request, QrCodeGenerator $qrCodeGenerator): JsonResponse
+    {
+        $request->validate([
+            'text' => 'required|string|max:2953',
+            'format' => 'in:png,jpg,jpeg',
+            'foreground_color' => 'regex:/^#[0-9A-Fa-f]{6}$/',
+            'background_color' => 'regex:/^#[0-9A-Fa-f]{6}$/',
+            'size' => 'integer|min:100|max:1000',
+        ]);
+
+        try {
+            $base64Image = $qrCodeGenerator->generate(
+                text: $request->input('text'),
+                format: $request->input('format', 'png'),
+                foregroundColor: $request->input('foreground_color', '#000000'),
+                backgroundColor: $request->input('background_color', '#FFFFFF'),
+                size: $request->input('size', 300)
+            );
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'image' => 'data:image/'.($request->input('format') === 'jpg' ? 'jpeg' : 'png').';base64,'.$base64Image,
+                    'format' => $request->input('format', 'png'),
+                ],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Fehler beim Generieren des QR-Codes: '.$e->getMessage(),
+            ], 422);
+        }
     }
 }

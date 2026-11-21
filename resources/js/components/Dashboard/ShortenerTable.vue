@@ -19,6 +19,7 @@
           :timezone="timezone"
           @edit="$emit('edit', shortener)"
           @delete="$emit('delete', shortener)"
+          @show-qr="$emit('show-qr', $event)"
         />
       </tbody>
     </table>
@@ -39,5 +40,5 @@ defineProps({
   }
 })
 
-defineEmits(['edit', 'delete'])
+defineEmits(['edit', 'delete', 'show-qr'])
 </script>

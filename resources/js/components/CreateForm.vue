@@ -13,6 +13,7 @@
         :short-link="createdShortLink"
         :show-dashboard-link="isAuthenticated"
         :dashboard-route="dashboardRoute"
+        :csrf-token="csrfToken"
         @close="successMessage = ''"
       />
 

@@ -55,4 +55,7 @@ Route::middleware('auth')->group(function () {
 
     Route::delete('/api/shorteners/{shortener}', [ShortenerController::class, 'destroy'])
         ->name('shortener.destroy');
+
+    Route::post('/api/qr-code', [ShortenerController::class, 'generateQrCode'])
+        ->name('qr-code.generate');
 });

@@ -30,6 +30,13 @@
     </td>
     <td class="px-6 py-4 text-right text-sm space-x-3">
       <button 
+        @click="showQrCode"
+        class="text-purple-600 hover:text-purple-800 hover:underline font-semibold"
+        title="QR-Code generieren"
+      >
+        QR
+      </button>
+      <button 
         @click="$emit('edit')"
         class="text-blue-600 hover:text-blue-800 hover:underline font-semibold"
       >
@@ -46,7 +53,7 @@
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   shortener: {
     type: Object,
     required: true
@@ -57,7 +64,7 @@ defineProps({
   }
 })
 
-defineEmits(['edit', 'delete'])
+const emit = defineEmits(['edit', 'delete', 'show-qr'])
 
 const formatDate = (dateString) => {
   if (!dateString) return '-'
@@ -70,5 +77,12 @@ const formatDate = (dateString) => {
 
   const [, year, month, day, hour = '00', minute = '00', second = '00'] = match
   return `${day}.${month}.${year} ${hour}:${minute}:${second}`
+}
+
+const showQrCode = () => {
+  emit('show-qr', {
+    text: window.location.origin + '/' + props.shortener.Hash,
+    hash: props.shortener.Hash
+  })
 }
 </script>

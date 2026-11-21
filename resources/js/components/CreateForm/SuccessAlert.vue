@@ -15,19 +15,34 @@
         {{ copyButtonText }}
       </button>
     </div>
-    <div v-if="showDashboardLink" class="mt-3">
+    <div class="mt-3 flex gap-2">
+      <button 
+        @click="showQrModal = true"
+        class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition text-sm font-semibold"
+      >
+        🎯 QR-Code
+      </button>
       <a 
+        v-if="showDashboardLink"
         :href="dashboardRoute"
-        class="inline-block px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm font-semibold"
+        class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm font-semibold"
       >
         Zum Dashboard
       </a>
     </div>
+
+    <QrCodeModal
+      :is-open="showQrModal"
+      :initial-text="shortLink"
+      :csrf-token="csrfToken"
+      @close="showQrModal = false"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import QrCodeModal from '../Dashboard/QrCodeModal.vue'
 
 defineProps({
   message: {
@@ -45,12 +60,17 @@ defineProps({
   dashboardRoute : {
     type: String,
     default: 'dashboard'
+  },
+  csrfToken: {
+    type: String,
+    default: ''
   }
 })
 
 defineEmits(['close'])
 
 const copyButtonText = ref('Kopieren')
+const showQrModal = ref(false)
 
 const copyToClipboard = () => {
   const input = document.querySelector('input[readonly]')

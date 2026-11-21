@@ -32,6 +32,7 @@
         :timezone="timezone"
         @edit="openEditModal"
         @delete="openDeleteModal"
+        @show-qr="openQrCodeModal"
       />
 
       <EmptyState v-else />
@@ -59,6 +60,14 @@
       @confirm="confirmDelete"
       @close="deletingItem = null"
     />
+
+    <QrCodeModal
+      :is-open="showQrModal"
+      :initial-text="qrCodeData.text"
+      :hash="qrCodeData.hash"
+      :csrf-token="csrfToken"
+      @close="showQrModal = false"
+    />
   </div>
 </template>
 
@@ -75,6 +84,7 @@ import EmptyState from './Dashboard/EmptyState.vue'
 import Pagination from './Dashboard/Pagination.vue'
 import EditModal from './Dashboard/EditModal.vue'
 import DeleteModal from './Dashboard/DeleteModal.vue'
+import QrCodeModal from './Dashboard/QrCodeModal.vue'
 
 const props = defineProps({
   csrfToken: {
@@ -101,6 +111,11 @@ const editingItem = ref(null)
 const editErrorMessage = ref('')
 const isSaving = ref(false)
 const deletingItem = ref(null)
+const showQrModal = ref(false)
+const qrCodeData = ref({
+  text: '',
+  hash: ''
+})
 
 const pagination = ref({
   current_page: 1,
@@ -159,6 +174,11 @@ const openEditModal = (item) => {
 
 const openDeleteModal = (item) => {
   deletingItem.value = item
+}
+
+const openQrCodeModal = (data) => {
+  qrCodeData.value = data
+  showQrModal.value = true
 }
 
 const saveChanges = async (formData) => {
