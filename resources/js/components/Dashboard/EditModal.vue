@@ -42,33 +42,16 @@
         </p>
       </div>
 
-      <div class="mb-4">
-        <label for="editPublishDate" class="block text-sm font-medium text-gray-700 mb-2">
-          Veröffentlichungsdatum <span class="text-gray-500 text-xs">(optional)</span>
-        </label>
-        <input 
-          id="editPublishDate"
-          v-model="formData.publish_date"
-          type="date" 
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
-        >
-        <p class="text-xs text-gray-500 mt-1">Link wird ab diesem Datum um 00:00 Uhr aktiv</p>
-      </div>
+      <DateRangeSlider
+        id-prefix="edit-dates"
+        :publish-date="formData.publish_date"
+        :expiration-date="formData.expiration_date"
+        :initially-open="Boolean(formData.publish_date || formData.expiration_date)"
+        @update:publish-date="formData.publish_date = $event"
+        @update:expiration-date="formData.expiration_date = $event"
+      />
 
-      <div class="mb-6">
-        <label for="editExpirationDate" class="block text-sm font-medium text-gray-700 mb-2">
-          Ablaufdatum <span class="text-gray-500 text-xs">(optional)</span>
-        </label>
-        <input 
-          id="editExpirationDate"
-          v-model="formData.expiration_date"
-          type="date" 
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
-        >
-        <p class="text-xs text-gray-500 mt-1">Link läuft an diesem Datum um 23:59:59 Uhr ab</p>
-      </div>
-
-      <div class="flex gap-3">
+      <div class="flex gap-3 mt-6">
         <button 
           @click="$emit('close')"
           :disabled="isSaving"
@@ -90,6 +73,7 @@
 
 <script setup>
 import { ref, watch } from 'vue'
+import DateRangeSlider from '../DateRangeSlider.vue'
 
 const props = defineProps({
   item: {

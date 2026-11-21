@@ -32,12 +32,12 @@
           @update:char-count="charCount = $event"
         />
 
-        <PublishDateInput 
-          v-model="form.publish_date"
-        />
-
-        <ExpirationDateInput 
-          v-model="form.expiration_date"
+        <DateRangeSlider
+          id-prefix="create-dates"
+          :publish-date="form.publish_date"
+          :expiration-date="form.expiration_date"
+          @update:publish-date="form.publish_date = $event"
+          @update:expiration-date="form.expiration_date = $event"
         />
 
         <SubmitButton 
@@ -61,8 +61,7 @@ import SuccessAlert from './CreateForm/SuccessAlert.vue'
 import UrlInput from './CreateForm/UrlInput.vue'
 import HashInput from './CreateForm/HashInput.vue'
 import DescriptionInput from './CreateForm/DescriptionInput.vue'
-import PublishDateInput from './CreateForm/PublishDateInput.vue'
-import ExpirationDateInput from './CreateForm/ExpirationDateInput.vue'
+import DateRangeSlider from './DateRangeSlider.vue'
 import SubmitButton from './CreateForm/SubmitButton.vue'
 import AuthCallout from './CreateForm/AuthCallout.vue'
 

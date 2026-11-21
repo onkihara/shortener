@@ -1,10 +1,10 @@
 <template>
   <div>
-    <label for="publish_date" class="block text-sm font-medium text-gray-700 mb-2">
-      Veröffentlichungsdatum <span class="text-gray-500 text-xs">(optional)</span>
+    <label :for="id" class="block text-sm font-medium text-gray-700 mb-2">
+      Verfügbar ab <span class="text-gray-500 text-xs">(optional)</span>
     </label>
     <input
-      id="publish_date"
+      :id="id"
       :value="modelValue"
       @input="$emit('update:modelValue', $event.target.value)"
       type="date"
@@ -18,6 +18,10 @@
 
 <script setup>
 defineProps({
+  id: {
+    type: String,
+    default: 'publish_date'
+  },
   modelValue: {
     type: String,
     default: ''
