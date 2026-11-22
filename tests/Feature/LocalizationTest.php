@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Shortener;
 use App\Models\User;
 
 it('chooses a supported browser language on the first request', function (?string $header, string $locale, string $tagline) {
@@ -99,3 +100,45 @@ it('replaces validation parameters in the selected language', function () {
         ->assertUnprocessable()
         ->assertJsonPath('errors.description.0', 'La descrizione può contenere al massimo 1024 caratteri.');
 });
+
+it('provides the German edit dialog title to the dashboard', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->withSession(['locale' => 'de'])
+        ->get(route('shortener.dashboard'))
+        ->assertOk()
+        ->assertSee('\u0022edit_shortener\u0022:\u0022Shortlink bearbeiten\u0022', false);
+});
+
+it('renders localized short link error pages', function (int $status, string $locale, string $title, bool $authenticated) {
+    $this->freezeTime();
+
+    if ($status === 409) {
+        Shortener::factory()->futurePublish()->create(['Hash' => 'error-link']);
+    } elseif ($status === 410) {
+        Shortener::factory()->create(['Hash' => 'error-link', 'ExpirationDate' => now()->subDay()]);
+    }
+
+    if ($authenticated) {
+        $this->actingAs(User::factory()->create());
+    }
+
+    $this->withSession(['locale' => $locale])
+        ->get('/error-link')
+        ->assertStatus($status)
+        ->assertSee('<html lang="'.$locale.'">', false)
+        ->assertSee($title);
+})->with([
+    '404 German' => [404, 'de', 'Shortlink nicht gefunden', false],
+    '404 English' => [404, 'en', 'Short link not found', false],
+    '404 Italian' => [404, 'it', 'Link breve non trovato', false],
+    '409 German' => [409, 'de', 'Shortlink noch nicht verfügbar', false],
+    '409 English' => [409, 'en', 'Short link not yet available', false],
+    '409 Italian' => [409, 'it', 'Link breve non ancora disponibile', false],
+    '410 German' => [410, 'de', 'Shortlink ist abgelaufen', false],
+    '410 English' => [410, 'en', 'Short link has expired', false],
+    '410 Italian' => [410, 'it', 'Link breve scaduto', false],
+    '404 authenticated' => [404, 'de', 'Shortlink nicht gefunden', true],
+    '410 authenticated' => [410, 'de', 'Shortlink ist abgelaufen', true],
+]);
