@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import Dashboard from '../components/Dashboard.vue'
+import { registerTranslations } from '../translations'
 
 export function mountDashboard(selector, props = {}) {
   const container = document.querySelector(selector)
@@ -14,6 +15,7 @@ export function mountDashboard(selector, props = {}) {
     createRoute: props.createRoute
   })
 
+  registerTranslations(app)
   app.mount(selector)
   return app
 }

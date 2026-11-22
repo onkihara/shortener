@@ -8,7 +8,7 @@
       @click="isOpen = !isOpen"
     >
       <div>
-        <span class="block text-sm font-semibold text-gray-900">Erweiterte Einstellungen</span>
+        <span class="block text-sm font-semibold text-gray-900">{{ $t('advanced_settings') }}</span>
         <span class="block text-xs text-gray-500 mt-0.5">{{ dateSummary }}</span>
       </div>
       <svg
@@ -44,6 +44,7 @@
 
 <script setup>
 import { computed, ref } from 'vue'
+import { t } from '../translations'
 import PublishDateInput from './CreateForm/PublishDateInput.vue'
 import ExpirationDateInput from './CreateForm/ExpirationDateInput.vue'
 
@@ -75,13 +76,13 @@ const expirationId = `${props.idPrefix}-expiration`
 
 const dateSummary = computed(() => {
   if (props.publishDate && props.expirationDate) {
-    return `${props.publishDate} bis ${props.expirationDate}`
+    return t('date_range', { start: props.publishDate, end: props.expirationDate })
   }
   if (props.publishDate) {
-    return `Ab ${props.publishDate}`
+    return t('date_from', { date: props.publishDate })
   }
   if (props.expirationDate) {
-    return `Bis ${props.expirationDate} 23:59:59`
+    return t('date_until', { date: props.expirationDate })
   }
   return ''
 })

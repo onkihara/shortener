@@ -27,7 +27,7 @@
         :href="dashboardRoute"
         class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm font-semibold"
       >
-        Zum Dashboard
+        {{ $t('dashboard_link') }}
       </a>
     </div>
 
@@ -42,6 +42,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import { t } from '../../translations'
 import QrCodeModal from '../Dashboard/QrCodeModal.vue'
 
 defineProps({
@@ -69,7 +70,7 @@ defineProps({
 
 defineEmits(['close'])
 
-const copyButtonText = ref('Kopieren')
+const copyButtonText = ref(t('copy'))
 const showQrModal = ref(false)
 
 const copyToClipboard = () => {
@@ -77,12 +78,12 @@ const copyToClipboard = () => {
   if (!input) return
 
   navigator.clipboard.writeText(input.value).then(() => {
-    copyButtonText.value = '✅ Kopiert!'
+    copyButtonText.value = t('copied')
     setTimeout(() => {
-      copyButtonText.value = 'Kopieren'
+      copyButtonText.value = t('copy')
     }, 2000)
   }).catch(() => {
-    copyButtonText.value = 'Fehler beim Kopieren'
+    copyButtonText.value = t('copy_error')
   })
 }
 </script>

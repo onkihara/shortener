@@ -114,7 +114,7 @@ class ShortenerController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Shortener erfolgreich erstellt.',
+                'message' => __('shortener.created'),
                 'data' => [
                     'id' => $shortener->ID,
                     'hash' => $shortener->Hash,
@@ -128,7 +128,7 @@ class ShortenerController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Fehler beim Erstellen des Shorteners: '.$e->getMessage(),
+                'message' => __('shortener.create_error_detail', ['message' => $e->getMessage()]),
             ], 422);
         }
     }
@@ -142,7 +142,7 @@ class ShortenerController extends Controller
         if ($shortener->UserID && $shortener->UserID !== auth()->id()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Unauthorized',
+                'message' => __('shortener.unauthorized'),
             ], 403);
         }
 
@@ -172,7 +172,7 @@ class ShortenerController extends Controller
         if ($shortener->UserID !== auth()->id()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Unauthorized',
+                'message' => __('shortener.unauthorized'),
             ], 403);
         }
 
@@ -193,7 +193,7 @@ class ShortenerController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Shortener erfolgreich aktualisiert.',
+                'message' => __('shortener.updated'),
                 'data' => [
                     'id' => $shortener->ID,
                     'hash' => $shortener->Hash,
@@ -209,7 +209,7 @@ class ShortenerController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Fehler beim Aktualisieren: '.$e->getMessage(),
+                'message' => __('shortener.update_error_detail', ['message' => $e->getMessage()]),
             ], 422);
         }
     }
@@ -223,7 +223,7 @@ class ShortenerController extends Controller
         if ($shortener->UserID !== auth()->id()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Unauthorized',
+                'message' => __('shortener.unauthorized'),
             ], 403);
         }
 
@@ -231,10 +231,10 @@ class ShortenerController extends Controller
             // Check if hard delete is requested
             if ($request->boolean('hard')) {
                 $shortener->forceDelete();
-                $message = 'Shortener vollständig gelöscht.';
+                $message = __('shortener.permanently_deleted');
             } else {
                 $shortener->delete();
-                $message = 'Shortener gelöscht.';
+                $message = __('shortener.deleted');
             }
 
             return response()->json([
@@ -247,7 +247,7 @@ class ShortenerController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Fehler beim Löschen: '.$e->getMessage(),
+                'message' => __('shortener.delete_error_detail', ['message' => $e->getMessage()]),
             ], 422);
         }
     }
@@ -262,7 +262,7 @@ class ShortenerController extends Controller
         if (! $hash) {
             return response()->json([
                 'success' => false,
-                'message' => 'Hash parameter is required.',
+                'message' => __('shortener.hash_required'),
             ], 400);
         }
 
@@ -271,7 +271,7 @@ class ShortenerController extends Controller
         if (! $shortener) {
             return response()->json([
                 'success' => false,
-                'message' => 'Shortener nicht gefunden.',
+                'message' => __('shortener.not_found'),
             ], 404);
         }
 
@@ -279,7 +279,7 @@ class ShortenerController extends Controller
         if ($shortener->isExpired()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Shortener ist abgelaufen.',
+                'message' => __('shortener.expired'),
             ], 410);
         }
 
@@ -328,7 +328,7 @@ class ShortenerController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Fehler beim Generieren des QR-Codes: '.$e->getMessage(),
+                'message' => __('shortener.qr_error_detail', ['message' => $e->getMessage()]),
             ], 422);
         }
     }

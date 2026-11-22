@@ -32,7 +32,7 @@
       <button 
         @click="showQrCode"
         class="text-purple-600 hover:text-purple-800 hover:underline font-semibold"
-        title="QR-Code generieren"
+        :title="$t('generate_qr')"
       >
         QR
       </button>
@@ -40,13 +40,13 @@
         @click="$emit('edit')"
         class="text-blue-600 hover:text-blue-800 hover:underline font-semibold"
       >
-        Bearbeiten
+        {{ $t('edit') }}
       </button>
       <button 
         @click="$emit('delete')"
         class="text-red-600 hover:text-red-800 hover:underline font-semibold"
       >
-        Löschen
+        {{ $t('delete') }}
       </button>
     </td>
   </tr>

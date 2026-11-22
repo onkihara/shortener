@@ -4,7 +4,7 @@
     :disabled="isLoading"
     class="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-semibold mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
   >
-    {{ isLoading ? 'Wird erstellt...' : '🔗 Short-Link erstellen' }}
+    {{ isLoading ? $t('creating') : $t('create_link') }}
   </button>
 </template>
 

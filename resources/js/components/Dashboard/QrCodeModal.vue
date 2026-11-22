@@ -2,7 +2,7 @@
   <div v-if="isOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-full overflow-y-auto p-6">
       <div class="flex justify-between items-center mb-6">
-        <h2 class="text-xl font-bold text-gray-900">QR-Code Generator</h2>
+        <h2 class="text-xl font-bold text-gray-900">{{ $t('qr_generator') }}</h2>
         <button 
           @click="close"
           class="text-gray-400 hover:text-gray-600"
@@ -20,20 +20,20 @@
         <div class="space-y-4">
           <div>
             <label for="qrText" class="block text-sm font-medium text-gray-700 mb-2">
-              Text oder URL
+              {{ $t('text_or_url') }}
             </label>
             <input 
               id="qrText"
               v-model="formData.text"
               type="text" 
-              placeholder="URL oder Text eingeben"
+              :placeholder="$t('enter_text_or_url')"
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
             />
           </div>
 
           <div>
             <label for="qrFormat" class="block text-sm font-medium text-gray-700 mb-2">
-              Format
+              {{ $t('format') }}
             </label>
             <select 
               id="qrFormat"
@@ -47,7 +47,7 @@
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              Vordergrundfarbe
+              {{ $t('foreground_color') }}
             </label>
             <div class="flex items-center gap-2">
               <input 
@@ -66,7 +66,7 @@
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              Hintergrundfarbe
+              {{ $t('background_color') }}
             </label>
             <div class="flex items-center gap-2">
               <input 
@@ -85,7 +85,7 @@
 
           <div>
             <label for="qrSize" class="block text-sm font-medium text-gray-700 mb-2">
-              Größe: {{ formData.size }}px
+              {{ $t('size') }}: {{ formData.size }}px
             </label>
             <input 
               id="qrSize"
@@ -96,7 +96,7 @@
               step="50"
               class="w-full"
             />
-            <p class="text-xs text-gray-500 mt-1">100 - 1000 Pixel</p>
+            <p class="text-xs text-gray-500 mt-1">{{ $t('pixels') }}</p>
           </div>
 
           <button 
@@ -104,7 +104,7 @@
             :disabled="isLoading || !formData.text"
             class="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {{ isLoading ? 'Generiert...' : 'QR-Code generieren' }}
+            {{ isLoading ? $t('generating') : $t('generate_qr') }}
           </button>
         </div>
 
@@ -112,7 +112,7 @@
         <div class="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 bg-gray-50">
           <div v-if="isLoading" class="text-center">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-            <p class="text-gray-600">Generiert...</p>
+            <p class="text-gray-600">{{ $t('generating') }}</p>
           </div>
 
           <div v-else-if="qrCodeImage" class="text-center">
@@ -126,13 +126,13 @@
                 @click="downloadQrCode"
                 class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-semibold"
               >
-                💾 Herunterladen
+                {{ $t('download') }}
               </button>
               <button 
                 @click="copyImageToClipboard"
                 class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold"
               >
-                📋 Kopieren
+                {{ $t('copy_icon') }}
               </button>
             </div>
           </div>
@@ -141,7 +141,7 @@
             <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
             </svg>
-            <p class="text-gray-600">QR-Code Vorschau</p>
+            <p class="text-gray-600">{{ $t('qr_preview') }}</p>
           </div>
         </div>
       </div>
@@ -151,7 +151,7 @@
           @click="close"
           class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-semibold"
         >
-          Schließen
+          {{ $t('close') }}
         </button>
       </div>
     </div>
@@ -160,6 +160,7 @@
 
 <script setup>
 import { ref, watch } from 'vue'
+import { t } from '../../translations'
 
 const props = defineProps({
   isOpen: {
@@ -196,7 +197,7 @@ const errorMessage = ref('')
 
 const generateQrCode = async () => {
   if (!formData.value.text.trim()) {
-    errorMessage.value = 'Bitte geben Sie einen Text oder eine URL ein.'
+    errorMessage.value = t('qr_text_required')
     return
   }
 
@@ -223,12 +224,12 @@ const generateQrCode = async () => {
     const data = await response.json()
 
     if (!response.ok) {
-      throw new Error(data.message || 'Fehler beim Generieren des QR-Codes')
+      throw new Error(data.message || t('qr_error'))
     }
 
     qrCodeImage.value = data.data.image
   } catch (error) {
-    errorMessage.value = error.message || 'Ein Fehler ist aufgetreten'
+    errorMessage.value = error.message || t('error')
   } finally {
     isLoading.value = false
   }
@@ -259,9 +260,9 @@ const copyImageToClipboard = async () => {
     ])
     
     errorMessage.value = ''
-    alert('QR-Code in die Zwischenablage kopiert!')
+    alert(t('qr_copied'))
   } catch (error) {
-    errorMessage.value = 'Fehler beim Kopieren in die Zwischenablage'
+    errorMessage.value = t('clipboard_error')
   }
 }
 

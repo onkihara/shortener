@@ -57,6 +57,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import { t } from '../translations'
 import ErrorAlert from './CreateForm/ErrorAlert.vue'
 import SuccessAlert from './CreateForm/SuccessAlert.vue'
 import UrlInput from './CreateForm/UrlInput.vue'
@@ -112,7 +113,7 @@ const submitForm = async () => {
     && form.value.expiration_date
     && form.value.expiration_date < form.value.publish_date
   ) {
-    errorMessage.value = 'Das Ablaufdatum darf nicht vor dem Veröffentlichungsdatum liegen.'
+    errorMessage.value = t('date_order_error')
     return
   }
 
@@ -138,7 +139,7 @@ const submitForm = async () => {
     const data = await response.json()
 
     if (!response.ok) {
-      throw new Error(data.message || 'Ein Fehler ist aufgetreten.')
+      throw new Error(data.message || t('error'))
     }
 
     successMessage.value = data.message
@@ -152,7 +153,7 @@ const submitForm = async () => {
     }
     charCount.value = 0
   } catch (error) {
-    errorMessage.value = error.message || 'Ein unbekannter Fehler ist aufgetreten.'
+    errorMessage.value = error.message || t('unknown_error')
   } finally {
     isSubmitting.value = false
   }

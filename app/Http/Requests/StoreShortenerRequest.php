@@ -25,7 +25,7 @@ class StoreShortenerRequest extends FormRequest
     {
         throw new ValidationException($validator, response()->json([
             'success' => false,
-            'message' => 'Validation failed',
+            'message' => __('shortener.validation_failed'),
             'errors' => $validator->errors(),
         ], 422));
     }
@@ -69,15 +69,15 @@ class StoreShortenerRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'url.required' => 'Eine URL ist erforderlich.',
-            'url.url' => 'Bitte geben Sie eine gültige URL ein (http, https, ftp, ftps).',
-            'url.max' => 'Die URL darf max. '.config('shortener.url.max_length', 1024).' Zeichen lang sein.',
-            'hash.max' => 'Der Hash darf max. '.config('shortener.hash.max_length', 16).' Zeichen lang sein.',
-            'hash.regex' => 'Der Hash darf nur Buchstaben, Zahlen, Bindestrich und Unterstrich enthalten.',
-            'hash.unique' => 'Dieser Hash ist bereits vergeben.',
-            'description.max' => 'Die Beschreibung darf max. '.config('shortener.description.max_length', 1024).' Zeichen lang sein.',
-            'publish_date.date_format' => 'Das Publish-Datum muss das Format YYYY-MM-DD HH:MM haben.',
-            'expiration_date.date_format' => 'Das Verfallsdatum muss das Format YYYY-MM-DD HH:MM:SS haben.',
+            'url.required' => __('shortener.url_required'),
+            'url.url' => __('shortener.url_invalid'),
+            'url.max' => __('shortener.url_max'),
+            'hash.max' => __('shortener.hash_max'),
+            'hash.regex' => __('shortener.hash_invalid'),
+            'hash.unique' => __('shortener.hash_taken'),
+            'description.max' => __('shortener.description_max'),
+            'publish_date.date_format' => __('shortener.publish_format'),
+            'expiration_date.date_format' => __('shortener.expiration_format'),
         ];
     }
 
@@ -102,7 +102,7 @@ class StoreShortenerRequest extends FormRequest
                 if ($expiration->lessThan($publish)) {
                     $validator->errors()->add(
                         'expiration_date',
-                        'Das Verfallsdatum darf nicht vor dem Publish-Datum liegen.',
+                        __('shortener.date_validation'),
                     );
                 }
             },

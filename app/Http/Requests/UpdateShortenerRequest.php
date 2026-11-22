@@ -45,9 +45,9 @@ class UpdateShortenerRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'description.max' => 'Die Beschreibung darf max. '.config('shortener.description.max_length', 1024).' Zeichen lang sein.',
-            'publish_date.date_format' => 'Das Publish-Datum muss das Format YYYY-MM-DD HH:MM haben.',
-            'expiration_date.date_format' => 'Das Verfallsdatum muss das Format YYYY-MM-DD HH:MM:SS haben.',
+            'description.max' => __('shortener.description_max'),
+            'publish_date.date_format' => __('shortener.publish_format'),
+            'expiration_date.date_format' => __('shortener.expiration_format'),
         ];
     }
 
@@ -79,7 +79,7 @@ class UpdateShortenerRequest extends FormRequest
                 if ($expiration->lessThan($publish)) {
                     $validator->errors()->add(
                         'expiration_date',
-                        'Das Verfallsdatum darf nicht vor dem Publish-Datum liegen.',
+                        __('shortener.date_validation'),
                     );
                 }
             },

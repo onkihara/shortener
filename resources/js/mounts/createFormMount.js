@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import CreateForm from '../components/CreateForm.vue'
+import { registerTranslations } from '../translations'
 
 export function mountCreateForm(selector, props = {}) {
   const container = document.querySelector(selector)
@@ -16,6 +17,7 @@ export function mountCreateForm(selector, props = {}) {
     dashboardRoute: props.dashboardRoute
   })
 
+  registerTranslations(app)
   app.mount(selector)
   return app
 }

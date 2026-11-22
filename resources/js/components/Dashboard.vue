@@ -35,7 +35,7 @@
         @show-qr="openQrCodeModal"
       />
 
-      <EmptyState v-else />
+      <EmptyState v-else :create-route="createRoute" />
 
       <Pagination 
         v-if="pagination.last_page > 1 && !isLoading"
@@ -73,6 +73,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { t } from '../translations'
 import DashboardHeader from './Dashboard/DashboardHeader.vue'
 import CreateButtonBar from './Dashboard/CreateButtonBar.vue'
 import ErrorAlert from './Dashboard/ErrorAlert.vue'
@@ -143,14 +144,14 @@ const loadShorteners = async () => {
     })
 
     if (!response.ok) {
-      throw new Error('Failed to load shorteners')
+      throw new Error(t('load_failed'))
     }
 
     const data = await response.json()
     shorteners.value = data.data
     pagination.value = data.pagination
   } catch (error) {
-    errorMessage.value = 'Fehler beim Laden der Shortcuts: ' + error.message
+    errorMessage.value = t('load_error', { message: error.message })
   } finally {
     isLoading.value = false
   }
@@ -199,21 +200,21 @@ const saveChanges = async (formData) => {
     })
 
     if (!response.headers.get('content-type')?.includes('application/json')) {
-      throw new Error(`Unerwartete Antwort beim Speichern (HTTP ${response.status})`)
+      throw new Error(t('save_unexpected', { status: response.status }))
     }
 
     const data = await response.json()
 
     if (!response.ok) {
       const validationMessages = Object.values(data.errors || {}).flat().filter(message => typeof message === 'string')
-      throw new Error(validationMessages.join(' ') || data.message || `Fehler beim Speichern (HTTP ${response.status})`)
+      throw new Error(validationMessages.join(' ') || data.message || t('save_error', { status: response.status }))
     }
 
     successMessage.value = data.message
     editingItem.value = null
     loadShorteners()
   } catch (error) {
-    editErrorMessage.value = 'Fehler: ' + (error.message || 'Ein unbekannter Fehler ist aufgetreten.')
+    editErrorMessage.value = t('error_prefix', { message: error.message || t('unknown_error') })
   } finally {
     isSaving.value = false
   }
@@ -234,14 +235,14 @@ const confirmDelete = async () => {
     const data = await response.json()
 
     if (!response.ok) {
-      throw new Error(data.message || 'Fehler beim Löschen')
+      throw new Error(data.message || t('delete_error'))
     }
 
     successMessage.value = data.message
     deletingItem.value = null
     loadShorteners()
   } catch (error) {
-    errorMessage.value = 'Fehler: ' + error.message
+    errorMessage.value = t('error_prefix', { message: error.message })
   }
 }
 

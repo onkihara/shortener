@@ -1,13 +1,13 @@
 <template>
   <div>
     <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
-      Beschreibung <span class="text-gray-500 text-xs">(optional)</span>
+      {{ $t('description') }} <span class="text-gray-500 text-xs">({{ $t('optional') }})</span>
     </label>
     <textarea
       id="description"
       :value="modelValue"
       @input="handleInput"
-      placeholder="Beschreibe diesen Link..."
+      :placeholder="$t('describe_link')"
       rows="3"
       maxlength="1024"
       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition resize-none"

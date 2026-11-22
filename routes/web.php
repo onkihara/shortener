@@ -2,10 +2,22 @@
 
 use App\Http\Controllers\ShortenerController;
 use App\Http\Controllers\UserController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Validation\Rule;
 use Laravel\Socialite\Socialite;
 
 // Web Routes for Frontend Views
+Route::post('/language', function (Request $request) {
+    $validated = $request->validate([
+        'locale' => ['required', Rule::in(array_keys(config('app.supported_locales')))],
+    ]);
+
+    $request->session()->put('locale', $validated['locale']);
+
+    return back();
+})->name('language.update');
+
 Route::get('/', function () {
     return view('shortener.create');
 })->name('shortener.create-form');
@@ -35,11 +47,11 @@ Route::get('{hash}', [ShortenerController::class, 'redirect'])
 Route::post('/api/shorten', [ShortenerController::class, 'store'])
     ->name('shortener.store')
     ->middleware('throttle:30,1');
-    
+
 Route::get('/api/shorten', [ShortenerController::class, 'getByHash'])
-    ->name('shortener.getByHash')
-    ->middleware('throttle:30,1');
-    
+        ->name('shortener.getByHash')
+        ->middleware('throttle:30,1');
+
 Route::post('/api/qr-code', [ShortenerController::class, 'generateQrCode'])
         ->name('qr-code.generate')
         ->middleware('throttle:30,1');

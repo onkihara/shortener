@@ -5,10 +5,10 @@
         <tr>
           <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Hash</th>
           <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">URL</th>
-          <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Häufigkeit</th>
-          <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Verfügbar ab</th>
-          <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Läuft ab am</th>
-          <th class="px-6 py-3 text-right text-sm font-semibold text-gray-700">Aktionen</th>
+          <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">{{ $t('frequency') }}</th>
+          <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">{{ $t('available_from') }}</th>
+          <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">{{ $t('expires_at') }}</th>
+          <th class="px-6 py-3 text-right text-sm font-semibold text-gray-700">{{ $t('actions') }}</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-gray-200">

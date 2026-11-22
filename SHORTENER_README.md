@@ -15,6 +15,7 @@ Eine moderne, sichere und benutzerfreundliche URL-Shortener-Anwendung basierend 
 - ✅ Automatische Generierung eindeutiger Hashes (6-8 Zeichen)
 - ✅ Redirect mit Frequency-Tracking
 - ✅ Responsive Design (Mobile-ready)
+- ✅ Deutsch, Italienisch und Englisch: automatische Browser-Sprachauswahl und Sprachwechsel im Kopfbereich
 
 ### 👤 Authentifizierte Features
 - ✅ Dashboard mit eigenen Short-Links
@@ -85,6 +86,8 @@ npm run dev
 ---
 
 ## 🚀 Usage
+
+Die Startsprache richtet sich nach den vom Browser bevorzugten unterstützten Sprachen. Ohne passende Browsersprache gilt `APP_LOCALE` (standardmäßig Englisch). Die Auswahl im Kopfbereich bleibt während der Sitzung auch nach dem Abmelden erhalten. Die Texte für Blade und Vue liegen gemeinsam in `lang/{de,it,en}/shortener.php`; Validierungstexte stehen in den jeweiligen `validation.php`-Dateien.
 
 ### Development starten
 ```bash

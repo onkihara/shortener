@@ -9,6 +9,8 @@
 
     <title>blikk :: shortener</title>
 
+    @php($translations = __('shortener'))
+    <script>window.translations = {{ Illuminate\Support\Js::from($translations) }};</script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
 </head>
@@ -19,20 +21,21 @@
                 <img src="{{ asset('blikk_gross.png') }}" alt="blikk.it" class="h-8 w-auto">
                 <span class="text-xl">blikk :: shortener</span>
             </a>
-            @auth
-                <div class="flex gap-4 items-center">
+            <div class="flex flex-wrap gap-4 items-center justify-end">
+                @guest
+                    <p class="text-sm">{{ __('shortener.tagline') }}</p>
+                @endguest
+                @include('language-selector')
+                @auth
                     <span class="text-sm text-gray-700">{{ auth()->user()->name }}</span>
                     <form action="{{ route('logout') }}" method="POST" class="inline">
                         @csrf
                         <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm font-semibold">
-                            Abmelden
+                            {{ __('shortener.logout') }}
                         </button>
                     </form>
-                </div>
-            @endauth
-            @guest
-                <p>Erstelle kurze Links für deine langen URLs</p>
-            @endguest
+                @endauth
+            </div>
         </div>
     </header>
 
@@ -41,12 +44,12 @@
     </main>
 
     <footer class="py-8 text-center text-sm bg-[#FF9900]">
-        <p>{{ __('shortener.client.footer') }}</p>
+        <p>{{ __('shortener.footer') }}</p>
         <div>
             <p>&copy; <a class="text-red-700 hover:text-red-900" href="https://www.blikk.it">Bildungsserver blikk</a>
-                <span>{{ __('shortener.client.department_prefix') }}
-                    <a class="text-red-700 hover:text-red-900" href="https://deutsche-bildung.provinz.bz.it/de/didaktik-beratung">{{ __('shortener.client.education_department') }}</a>
-                    - {{ __('shortener.client.city') }} {{ date('Y') }}
+                <span>{{ __('shortener.department_prefix') }}
+                    <a class="text-red-700 hover:text-red-900" href="https://deutsche-bildung.provinz.bz.it/de/didaktik-beratung">{{ __('shortener.education_department') }}</a>
+                    - {{ __('shortener.city') }} {{ date('Y') }}
                 </span>
             </p>
         </div>

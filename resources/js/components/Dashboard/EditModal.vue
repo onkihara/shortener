@@ -1,7 +1,7 @@
 <template>
   <div v-if="item" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-lg shadow-xl max-w-md w-full max-h-full overflow-y-auto p-6">
-      <h2 class="text-xl font-bold text-gray-900 mb-4">Shortener bearbeiten</h2>
+      <h2 class="text-xl font-bold text-gray-900 mb-4">{{ $t('edit_shortener') }}</h2>
 
       <div v-if="validationError || errorMessage" class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg" role="alert">
         <p class="text-red-700">{{ validationError || errorMessage }}</p>
@@ -28,7 +28,7 @@
       </div>
 
       <div class="mb-4">
-        <label for="editDescription" class="block text-sm font-medium text-gray-700 mb-2">Beschreibung</label>
+        <label for="editDescription" class="block text-sm font-medium text-gray-700 mb-2">{{ $t('description') }}</label>
         <textarea
           id="editDescription"
           v-model="formData.description"
@@ -57,14 +57,14 @@
           :disabled="isSaving"
           class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-semibold disabled:opacity-50"
         >
-          Abbrechen
+          {{ $t('cancel') }}
         </button>
         <button 
           @click="handleSave"
           :disabled="isSaving"
           class="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-semibold disabled:opacity-50"
         >
-          {{ isSaving ? 'Speichert...' : 'Speichern' }}
+          {{ isSaving ? $t('saving') : $t('save') }}
         </button>
       </div>
     </div>
@@ -73,6 +73,7 @@
 
 <script setup>
 import { ref, watch } from 'vue'
+import { t } from '../../translations'
 import DateRangeSlider from '../DateRangeSlider.vue'
 
 const props = defineProps({
@@ -137,7 +138,7 @@ const handleSave = () => {
 
   if (formData.value.publish_date && formData.value.expiration_date) {
     if (formData.value.expiration_date < formData.value.publish_date) {
-      validationError.value = 'Das Ablaufdatum darf nicht vor dem Veröffentlichungsdatum liegen.'
+      validationError.value = t('date_order_error')
       return
     }
   }
