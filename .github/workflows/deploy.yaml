@@ -1,0 +1,144 @@
+name: Deploy to blikk
+
+# An .env-file and the target dir must exist on the server
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+      DEPLOY_PORT: ${{ vars.SSH_PORT || '22' }}
+      TARGET_UID: 82
+      TARGET_GID: 82
+      DEPLOY_PATH: /apps/www/shortener
+      APP_PATH: tools/dobble
+      DEPLOY_OPTIMIZE_URL: https://s.blikk.it/shortener_optimize.php
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          tools: composer:v2
+          coverage: none
+
+      - name: Create dirs for composer post-install scripts and sqlite database
+        run: |
+          mkdir bootstrap/cache
+          mkdir -p storage/framework/views
+          touch database/database.sqlite
+
+      - name: Install production Composer dependencies
+        run: composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+
+      # - name: Run migrations
+      #   run: |
+      #     php artisan migrate --force
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies and build assets
+        run: |
+          npm ci
+          npm run build
+
+      - name: Configure SSH
+        run: |
+          test -n "$SSH_HOST"
+          test -n "$SSH_USER"
+          test -n "$SSH_PRIVATE_KEY"
+          test -n "$SSH_KNOWN_HOSTS"
+
+          mkdir -p "$HOME/.ssh"
+          chmod 700 "$HOME/.ssh"
+          printf '%s\n' "$SSH_PRIVATE_KEY" > "$HOME/.ssh/id_ed25519"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/id_ed25519" "$HOME/.ssh/known_hosts"
+
+      - name: Re-Set Laravel writable directory ownership via sudoer-script
+        run: |
+          ssh \
+            -i "$HOME/.ssh/id_ed25519" \
+            -p "$DEPLOY_PORT" \
+            -o StrictHostKeyChecking=yes \
+            "$SSH_USER@$SSH_HOST" \
+            "sudo -n /apps/scripts/laravel-fix-permissions.sh '$APP_PATH' '$SSH_USER' '$SSH_USER'"
+
+      - name: Sync Laravel deployment files
+        run: |
+          rsync -az --checksum --itemize-changes --omit-dir-times \
+            -e "ssh -i $HOME/.ssh/id_ed25519 -p $DEPLOY_PORT -o StrictHostKeyChecking=yes" \
+            --exclude='/public/storage/***' \
+            --include='/app/***' \
+            --include='/bootstrap/***' \
+            --include='/config/***' \
+            --include='/database/' \
+            --include='/database/database.sqlite' \
+            --include='/database/migrations/***' \
+            --include='/public/***' \
+            --include='/resources/' \
+            --include='/resources/views/***' \
+            --include='/resources/lang/***' \
+            --include='/routes/***' \
+            --include='/lang/***' \
+            --include='/storage/***' \
+            --include='/artisan' \
+            --include='/composer.json' \
+            --include='/composer.lock' \
+            --include='/vendor/***' \
+            --exclude='*' \
+            ./ "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/"
+
+      - name: Create remote directories not yet deployed
+        run: |
+          ssh \
+            -i "$HOME/.ssh/id_ed25519" \
+            -p "$DEPLOY_PORT" \
+            -o StrictHostKeyChecking=yes \
+            "$SSH_USER@$SSH_HOST" \
+            "mkdir -p \
+              '$DEPLOY_PATH/storage/app/private' \
+              '$DEPLOY_PATH/storage/app/public' \
+              '$DEPLOY_PATH/storage/framework/cache/data' \
+              '$DEPLOY_PATH/storage/framework/sessions' \
+              '$DEPLOY_PATH/storage/framework/testing' \
+              '$DEPLOY_PATH/storage/logs'"
+
+      - name: Set Laravel writable directory ownership via sudoer-script
+        run: |
+          ssh \
+            -i "$HOME/.ssh/id_ed25519" \
+            -p "$DEPLOY_PORT" \
+            -o StrictHostKeyChecking=yes \
+            "$SSH_USER@$SSH_HOST" \
+            "sudo -n /apps/scripts/laravel-fix-permissions.sh '$APP_PATH' '$TARGET_UID' '$TARGET_GID'"
+
+      - name: Optimize installation
+        run: wget "$DEPLOY_OPTIMIZE_URL"
+
+      - name: Remove SSH key
+        if: always()
+        run: rm -f "$HOME/.ssh/id_ed25519"
