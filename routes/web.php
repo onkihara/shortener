@@ -19,6 +19,14 @@ Route::post('/language', function (Request $request) {
 })->name('language.update');
 
 Route::get('/', function () {
+    if (auth()->check()) {
+        return redirect()->route('shortener.create-form');
+    }
+
+    return view('shortener.index');
+})->name('shortener.index-page');
+
+Route::get('/shortener/create', function () {
     return view('shortener.create');
 })->name('shortener.create-form');
 

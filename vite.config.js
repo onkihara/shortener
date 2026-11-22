@@ -11,6 +11,7 @@ export default defineConfig({
                 'resources/css/app.css',
                 'resources/js/app.js',
                 'resources/js/mounts/createFormMount.js',
+                'resources/js/mounts/heroMount.js',
                 'resources/js/mounts/dashboardMount.js',
             ],
             refresh: true,

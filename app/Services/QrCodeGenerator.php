@@ -7,8 +7,12 @@ use Endroid\QrCode\Encoding\Encoding;
 use Endroid\QrCode\ErrorCorrectionLevel;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\RoundBlockSizeMode;
-use Endroid\QrCode\Writer\JpegWriter;
+use Endroid\QrCode\Writer\GifWriter;
 use Endroid\QrCode\Writer\PngWriter;
+use Endroid\QrCode\Writer\SvgWriter;
+use Endroid\QrCode\Writer\WebPWriter;
+use Endroid\QrCode\Writer\WriterInterface;
+use InvalidArgumentException;
 
 class QrCodeGenerator
 {
@@ -16,7 +20,7 @@ class QrCodeGenerator
      * Generate a QR code from text/URL
      *
      * @param  string  $text  The text to encode
-     * @param  string  $format  The output format ('png' or 'jpg')
+     * @param  string  $format  The output format ('png', 'gif', 'svg' or 'webp')
      * @param  string  $foregroundColor  Hex color for QR code (e.g., '#000000')
      * @param  string  $backgroundColor  Hex color for background (e.g., '#FFFFFF')
      * @param  int  $size  Size of the QR code (default: 300)
@@ -65,7 +69,7 @@ class QrCodeGenerator
      *
      * @param  string  $text  The text to encode
      * @param  string  $filePath  Path where to save the file
-     * @param  string  $format  The output format ('png' or 'jpg')
+     * @param  string  $format  The output format ('png', 'gif', 'svg' or 'webp')
      * @param  string  $foregroundColor  Hex color for QR code
      * @param  string  $backgroundColor  Hex color for background
      * @param  int  $size  Size of the QR code
@@ -114,13 +118,15 @@ class QrCodeGenerator
      * Get the appropriate writer based on format
      *
      * @param  string  $format  The output format
-     * @return PngWriter|JpegWriter
      */
-    private function getWriter(string $format)
+    private function getWriter(string $format): WriterInterface
     {
         return match (strtolower($format)) {
-            'jpg', 'jpeg' => new JpegWriter,
-            default => new PngWriter,
+            'png' => new PngWriter,
+            'gif' => new GifWriter,
+            'svg' => new SvgWriter,
+            'webp' => new WebPWriter,
+            default => throw new InvalidArgumentException("Unsupported QR code format: {$format}"),
         };
     }
 

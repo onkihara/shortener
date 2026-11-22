@@ -303,16 +303,17 @@ class ShortenerController extends Controller
     {
         $request->validate([
             'text' => 'required|string|max:2953',
-            'format' => 'in:png,jpg,jpeg',
+            'format' => 'in:png,gif,svg,webp',
             'foreground_color' => 'regex:/^#[0-9A-Fa-f]{6}$/',
             'background_color' => 'regex:/^#[0-9A-Fa-f]{6}$/',
             'size' => 'integer|min:100|max:1000',
         ]);
 
         try {
+            $format = $request->input('format', 'png');
             $base64Image = $qrCodeGenerator->generate(
                 text: $request->input('text'),
-                format: $request->input('format', 'png'),
+                format: $format,
                 foregroundColor: $request->input('foreground_color', '#000000'),
                 backgroundColor: $request->input('background_color', '#FFFFFF'),
                 size: $request->input('size', 300)
@@ -321,8 +322,8 @@ class ShortenerController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => [
-                    'image' => 'data:image/'.($request->input('format') === 'jpg' ? 'jpeg' : 'png').';base64,'.$base64Image,
-                    'format' => $request->input('format', 'png'),
+                    'image' => 'data:image/'.($format === 'svg' ? 'svg+xml' : $format).';base64,'.$base64Image,
+                    'format' => $format,
                 ],
             ]);
         } catch (\Exception $e) {

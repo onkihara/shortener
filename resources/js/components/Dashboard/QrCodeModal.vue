@@ -41,7 +41,9 @@
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
             >
               <option value="png">PNG</option>
-              <option value="jpg">JPG</option>
+              <option value="gif">GIF</option>
+              <option value="svg">SVG</option>
+              <option value="webp">WebP</option>
             </select>
           </div>
 
@@ -192,6 +194,7 @@ const formData = ref({
 })
 
 const qrCodeImage = ref('')
+const qrCodeFormat = ref('png')
 const isLoading = ref(false)
 const errorMessage = ref('')
 
@@ -228,6 +231,7 @@ const generateQrCode = async () => {
     }
 
     qrCodeImage.value = data.data.image
+    qrCodeFormat.value = data.data.format
   } catch (error) {
     errorMessage.value = error.message || t('error')
   } finally {
@@ -240,7 +244,7 @@ const downloadQrCode = () => {
   
   const link = document.createElement('a')
   link.href = qrCodeImage.value
-  link.download = `${props.hash}.${formData.value.format}`
+  link.download = `${props.hash || 'qr-code'}.${qrCodeFormat.value}`
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
@@ -250,12 +254,19 @@ const copyImageToClipboard = async () => {
   if (!qrCodeImage.value) return
 
   try {
-    const response = await fetch(qrCodeImage.value)
-    const blob = await response.blob()
-    
+    const image = new Image()
+    image.src = qrCodeImage.value
+    const pngBlob = image.decode().then(() => new Promise((resolve, reject) => {
+      const canvas = document.createElement('canvas')
+      canvas.width = image.naturalWidth
+      canvas.height = image.naturalHeight
+      canvas.getContext('2d').drawImage(image, 0, 0)
+      canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('PNG conversion failed')), 'image/png')
+    }))
+
     await navigator.clipboard.write([
       new ClipboardItem({
-        'image/png': blob
+        'image/png': pngBlob
       })
     ])
     

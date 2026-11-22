@@ -20,7 +20,7 @@
         @click="showQrModal = true"
         class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition text-sm font-semibold"
       >
-        🎯 QR-Code
+        QR-Code
       </button>
       <a 
         v-if="showDashboardLink"

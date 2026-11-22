@@ -65,15 +65,15 @@
 
           <!-- CTA Buttons -->
           <div class="flex flex-col sm:flex-row gap-4 pt-4">
-            <button
-              @click="scrollToForm"
+            <a
+              :href="createRoute"
               class="inline-flex items-center justify-center px-8 py-3 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white font-semibold rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
             >
               {{ $t('get_started') }}
               <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
-            </button>
+            </a>
             <a
               v-if="!isAuthenticated"
               :href="loginRoute"
@@ -92,7 +92,7 @@
         </div>
 
         <!-- Right column: Illustration -->
-        <div class="relative h-96 md:h-full flex items-center justify-center">
+        <div class="hidden lg:block relative h-96 md:h-full flex items-center justify-center">
           <div class="relative w-full h-full max-w-md mx-auto">
             <!-- Animated gradient cards -->
             <div class="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-2xl opacity-10 dark:opacity-5 blur-xl"></div>
@@ -133,9 +133,6 @@
 </template>
 
 <script setup>
-import { defineProps } from 'vue'
-import { t } from '../translations'
-
 defineProps({
   isAuthenticated: {
     type: Boolean,
@@ -149,16 +146,9 @@ defineProps({
     type: String,
     default: 'dashboard'
   },
-  scrollTarget: {
+  createRoute: {
     type: String,
-    default: '#createFormApp'
+    required: true
   }
 })
-
-const scrollToForm = () => {
-  const target = document.querySelector('#createFormApp')
-  if (target) {
-    target.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
-}
 </script>

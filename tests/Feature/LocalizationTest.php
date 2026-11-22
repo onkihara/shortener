@@ -56,7 +56,7 @@ it('persists the selected language and supplies translations to the page and API
         ->assertUnprocessable()
         ->assertJsonPath('errors.url.0', $validation);
 })->with([
-    ['de', 'Erstelle kurze Links für deine langen URLs', 'Short-Link erstellen', 'Eine URL ist erforderlich.'],
+    ['de', 'Erstelle kurze Links für deine langen URLs', 'Shortlink erstellen', 'Eine URL ist erforderlich.'],
     ['it', 'Crea link brevi per i tuoi URL lunghi', 'Crea link breve', 'È richiesto un URL.'],
     ['en', 'Create short links for your long URLs', 'Create short link', 'A URL is required.'],
 ]);

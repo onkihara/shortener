@@ -1,6 +1,6 @@
 <template>
   <div class="bg-white shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+    <div class="sm:min-w-xl md:min-w-3xl lg:min-w-5xl max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
       <div>
         <h1 class="text-2xl font-bold text-gray-900">{{ $t('dashboard') }}</h1>
         <p class="text-sm text-gray-600 mt-1">{{ $t('manage_links') }}</p>

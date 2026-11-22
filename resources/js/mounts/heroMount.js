@@ -13,7 +13,7 @@ export function mountHero(selector, props = {}) {
     isAuthenticated: props.isAuthenticated || false,
     loginRoute: props.loginRoute || 'login',
     dashboardRoute: props.dashboardRoute || 'dashboard',
-    scrollTarget: props.scrollTarget || '#createFormApp'
+    createRoute: props.createRoute
   })
 
   registerTranslations(app)
@@ -28,6 +28,6 @@ if (container) {
     isAuthenticated: container.dataset.authenticated === 'true',
     loginRoute: container.dataset.loginRoute,
     dashboardRoute: container.dataset.dashboardRoute,
-    scrollTarget: container.dataset.scrollTarget || '#createFormApp'
+    createRoute: container.dataset.createRoute
   })
 }
