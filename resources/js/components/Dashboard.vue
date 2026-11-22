@@ -20,6 +20,7 @@
       />
 
       <SearchBar 
+        v-if="shorteners.length > 0"
         v-model="searchQuery"
         @update:model-value="handleSearch"
       />
