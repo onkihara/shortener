@@ -110,7 +110,7 @@ return [
     'hash_invalid' => 'The hash may only contain letters, numbers, hyphens and underscores.',
     'hash_taken' => 'This hash is already taken.',
     'description_max' => 'The description may not exceed :max characters.',
-    'publish_format' => 'The publication date must have the format YYYY-MM-DD HH:MM.',
-    'expiration_format' => 'The expiration date must have the format YYYY-MM-DD HH:MM:SS.',
+    'publish_format' => 'The publication date must have the format YYYY-MM-DD.',
+    'expiration_format' => 'The expiration date must have the format YYYY-MM-DD.',
     'date_validation' => 'The expiration date must not be before the publication date.',
 ];
