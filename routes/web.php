@@ -35,9 +35,14 @@ Route::get('{hash}', [ShortenerController::class, 'redirect'])
 Route::post('/api/shorten', [ShortenerController::class, 'store'])
     ->name('shortener.store')
     ->middleware('throttle:30,1');
-
+    
 Route::get('/api/shorten', [ShortenerController::class, 'getByHash'])
-    ->name('shortener.getByHash');
+    ->name('shortener.getByHash')
+    ->middleware('throttle:30,1');
+    
+Route::post('/api/qr-code', [ShortenerController::class, 'generateQrCode'])
+        ->name('qr-code.generate')
+        ->middleware('throttle:30,1');
 
 // Protected Routes - Require Authentication
 Route::middleware('auth')->group(function () {
@@ -56,6 +61,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/api/shorteners/{shortener}', [ShortenerController::class, 'destroy'])
         ->name('shortener.destroy');
 
-    Route::post('/api/qr-code', [ShortenerController::class, 'generateQrCode'])
-        ->name('qr-code.generate');
 });
