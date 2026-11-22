@@ -1,984 +1,499 @@
-# URL Shortener - Laravel Anwendung
+# URL Shortener
 
-Ein modernes, sicheres URL-Verkürzer-System mit erweiterten Features wie QR-Code-Generierung, Veröffentlichungsplanung, Ablaufdatum und YouTube-URL-Konvertierung.
+A Laravel application for creating and managing short URLs. It supports custom
+aliases, scheduled publication and expiration, QR-code generation, click counts,
+and optional OAuth sign-in through Laravel Socialite.
 
-## 📋 Inhaltsverzeichnis
+## Contents
 
-- [Funktionen](#funktionen)
-- [Technischer Aufbau](#technischer-aufbau)
-- [Anforderungen](#anforderungen)
+- [Features](#features)
+- [Technology and architecture](#technology-and-architecture)
+- [Requirements](#requirements)
 - [Installation](#installation)
-- [Konfiguration](#konfiguration)
-- [Verwendung](#verwendung)
-- [API-Endpoints](#api-endpoints)
-- [Entwicklung](#entwicklung)
-- [Testen](#testen)
-- [Deployment](#deployment)
-- [Lizenz](#lizenz)
+- [Configuration](#configuration)
+- [Using the application](#using-the-application)
+- [HTTP endpoints](#http-endpoints)
+- [Development and testing](#development-and-testing)
+- [Production deployment](#production-deployment)
+- [Troubleshooting](#troubleshooting)
 
-## ✨ Funktionen
+## Features
 
-### Kern-Funktionalität
+- Create short URLs anonymously or while signed in.
+- Generate a unique short code automatically or request a custom alias.
+- Set an optional publication date and expiration date.
+- Add a description and track the number of recorded accesses.
+- Generate QR codes in PNG, GIF, SVG, or WebP format, with configurable size
+  and colors.
+- Manage links in an authenticated dashboard and through authenticated JSON
+  endpoints.
+- Soft-delete links by default; an explicit option is available for permanent
+  deletion.
+- Redirect YouTube watch and short links to a privacy-enhanced embed URL.
+- Localize the interface using the configured application locales.
+- Sign in through an OAuth provider using Laravel Socialite.
 
-- **URL-Verkürzung**: Konvertiert lange URLs in kurze, leicht merkbare Links
-- **Eindeutige Hash-Generierung**: Automatische Generierung von eindeutigen, kurzen Hashes
-- **Custom Hash**: Benutzer können eigene Custom Hashes definieren (z.B. `example.com/mein-link`)
-- **Zugriffszähler**: Verfolgung der Häufigkeit, wie oft ein Shortlink verwendet wurde
-- **Soft Deletes**: Gelöschte Links bleiben in der Datenbank erhalten (können wiederhergestellt werden)
+## Technology and architecture
 
-### Erweiterte Features
+The versions below are the constraints declared by this repository, not a
+guarantee that every dependency is installed at the highest listed version.
 
-#### Veröffentlichungsplanung
-- **Publish Date**: Shortlinks können zeitgesteuert veröffentlicht werden
-- Shortlinks sind erst nach dem Veröffentlichungsdatum aktiv
-- Perfekt für zeitgesteuerte Kampagnen und Ankündigungen
+| Component | Version constraint | Purpose |
+| --- | --- | --- |
+| PHP | `^8.3` | Application runtime |
+| Laravel | `^13.17` | Web framework |
+| Laravel Socialite | `^5.33` | OAuth authentication |
+| Vue | `^3.5` | Front-end JavaScript framework |
+| Tailwind CSS | `^4.0` | CSS framework |
+| Vite | `^8.0` | Front-end development and build tool |
+| Pest | `^5.3` | Test framework |
+| Endroid QR Code | `^6.2` | QR-code generation |
 
-#### Ablaufdatum
-- **Expiration Date**: Links können mit einem Ablaufdatum versehen werden
-- Automatische Deaktivierung nach dem Ablaufdatum
-- Ideal für temporäre Promotionen und zeitlich begrenzte Inhalte
+### Application structure
 
-#### Metadaten
-- **Beschreibung**: Optionale Beschreibung für jeden Shortlink
-- Bessere Verwaltung und Dokumentation der Links
-
-#### QR-Code-Generierung
-- Automatische Erstellung von QR-Codes für jeden Shortlink
-- Integration mit der `endroid/qr-code` Bibliothek
-- Einfache Mobile-Nutzung
-
-#### YouTube-URL-Konvertierung
-- Automatische Erkennung von YouTube-URLs
-- Konvertierung zu werbefreien Embed-Varianten
-- Verbessertes Nutzererlebnis ohne störende Werbung
-
-#### Social Login (OAuth)
-- **Blikk OAuth**: Integration mit Blikk-Authentifizierung
-- Sichere Benutzer-Authentifizierung ohne Passwort-Verwaltung
-- Einmalige Anmeldung (Single Sign-On)
-
-#### Multi-Language Support
-- **Lokalisierung**: Mehrsprachige Benutzeroberfläche
-- Sprache kann via POST-Request gewechselt werden
-- Speicherung in Session
-
-#### Dashboard
-- **Authentifizierte Benutzer**: Dashboard für registrierte Nutzer
-- **Shortlink-Management**: Erstellen, Bearbeiten, Löschen von Links
-- **Statistiken**: Übersicht über die Zugriffe auf Ihre Links
-
-## 🏗️ Technischer Aufbau
-
-### Stack
-
-| Komponente | Version | Beschreibung |
-|-----------|---------|-------------|
-| **PHP** | 8.3+ | Programmiersprache |
-| **Laravel Framework** | 13.17+ | Web-Framework |
-| **Laravel Socialite** | 5.33+ | OAuth-Integration |
-| **Vue.js** | 3.5+ | Frontend-Framework |
-| **Tailwind CSS** | 4.0+ | CSS-Framework |
-| **Vite** | 8.0+ | Frontend-Build-Tool |
-| **Pest** | 5.3+ | PHP Testing-Framework |
-| **Laravel Pint** | 1.27+ | PHP Code Formatter |
-
-### Abhängigkeiten
-
-#### Production Dependencies
-- **laravel/framework**: Basis-Framework
-- **laravel/socialite**: OAuth/Social Login
-- **laravel/tinker**: REPL für Laravel
-- **endroid/qr-code**: QR-Code-Generierung
-- **onkihara/socialite_blikk**: Custom Blikk OAuth Provider
-
-#### Development Dependencies
-- **pestphp/pest**: Testing-Framework
-- **laravel/pint**: Code-Formatter
-- **laravel/pail**: Log Viewer
-- **laravel/boost**: Development Tools
-- **mockery/mockery**: Mocking-Framework
-
-### Datenbankschema
-
-#### Tabelle: `shortcuts`
-
-| Spalte | Typ | Beschreibung |
-|--------|-----|-------------|
-| `ID` | INT | Primärschlüssel (auto-increment) |
-| `UserID` | INT | Benutzer-ID (Fremdschlüssel) |
-| `Hash` | VARCHAR(16) | Eindeutiger Shortlink-Hash |
-| `Url` | VARCHAR(1024) | Ziel-URL |
-| `Description` | VARCHAR(1024) | Optionale Beschreibung |
-| `Frequency` | INT | Zugriffszähler |
-| `CreationDate` | DATETIME | Erstellungsdatum |
-| `UpdateDate` | DATETIME | Letztes Änderungsdatum |
-| `PublishDate` | DATETIME | Veröffentlichungsdatum (optional) |
-| `ExpirationDate` | DATETIME | Ablaufdatum (optional) |
-| `DeleteDate` | DATETIME | Löschdatum (soft delete) |
-
-### Modelle
-
-#### Shortener Model
-- Repräsentiert einen Shortlink
-- Custom Timestamps (`CreationDate`, `UpdateDate`, `DeleteDate`)
-- Scopes: `active()`, `published()`, `byUser()`
-- Methoden: `generateHash()`, `isPublished()`, `isExpired()`, `recordAccess()`
-
-#### User Model
-- Repräsentiert einen Benutzer
-- Authentifizierung via OAuth/Socialite
-- Beziehung zu Shortener-Links (1:N)
-
-### Verzeichnisstruktur
-
-```
-shortener/
-├── app/
-│   ├── Models/              # Eloquent Models
-│   │   ├── Shortener.php
-│   │   └── User.php
-│   ├── Http/
-│   │   ├── Controllers/     # API & Web Controller
-│   │   │   ├── ShortenerController.php
-│   │   │   └── UserController.php
-│   │   ├── Requests/        # Form Request Validation
-│   │   │   ├── StoreShortenerRequest.php
-│   │   │   └── UpdateShortenerRequest.php
-│   │   └── Middleware/      # Custom Middleware
-│   │       └── SetLocale.php
-│   ├── Services/            # Service Layer
-│   │   ├── QrCodeGenerator.php
-│   │   └── YouTubeConverter.php
-│   ├── Policies/            # Authorization Policies
-│   │   └── ShortenerPolicy.php
-│   └── Providers/           # Service Provider
-│       └── AppServiceProvider.php
-├── routes/
-│   ├── web.php              # Web Routes
-│   └── api.php              # API Routes
-├── resources/
-│   ├── views/               # Blade Templates
-│   └── js/                  # Vue Components
-├── config/
-│   ├── shortener.php        # App Configuration
-│   └── ...
-├── database/
-│   ├── migrations/          # Datenbank-Migrationen
-│   ├── factories/           # Model Factories
-│   └── seeders/             # Database Seeder
-├── tests/
-│   ├── Feature/             # Feature Tests
-│   ├── Unit/                # Unit Tests
-│   └── Pest.php
-└── storage/
-    └── app/                 # Lokale Dateiablage
+```text
+app/
+├── Http/
+│   ├── Controllers/       # Web and JSON request handling
+│   ├── Middleware/        # Request middleware, including locale selection
+│   └── Requests/          # Input validation
+├── Models/                # Eloquent models
+├── Policies/              # Authorization policies
+└── Services/              # QR-code and YouTube URL services
+config/                    # Laravel and shortener configuration
+database/
+├── migrations/            # Database schema
+├── factories/
+└── seeders/
+resources/
+├── js/                    # Front-end JavaScript
+├── css/
+└── views/                 # Blade templates
+routes/
+└── web.php                # Web pages and JSON endpoints
+tests/
+├── Feature/
+└── Unit/
 ```
 
-### Services
+The app's HTTP endpoints are currently defined in `routes/web.php`; the JSON
+endpoints use Laravel's normal web middleware and session-based authentication.
+They are not configured as stateless bearer-token API routes.
 
-#### QrCodeGenerator Service
-- Generiert QR-Codes für Shortlinks
-- Verwendet `endroid/qr-code` Bibliothek
-- Customisierbare Größe und Format
+### Short-link data
 
-#### YouTubeConverter Service
-- Erkennt YouTube-URLs
-- Konvertiert zu werbefreien Embed-URLs
-- Unterstützt verschiedene YouTube-URL-Formate
+Short links are stored in the `shortcuts` table. The `Shortener` model maps the
+legacy column names to Laravel Eloquent and uses soft deletes.
 
-## 📦 Anforderungen
+| Column | Description |
+| --- | --- |
+| `ID` | Auto-incrementing primary key |
+| `UserID` | Optional ID of the owner |
+| `Hash` | Unique short code (up to 16 characters) |
+| `Url` | Destination URL (up to 1,024 characters) |
+| `Description` | Optional description (up to 1,024 characters) |
+| `Frequency` | Recorded access count |
+| `CreationDate`, `UpdateDate` | Creation and update timestamps |
+| `PublishDate` | Optional time at which the link becomes available |
+| `ExpirationDate` | Optional time after which the link expires |
+| `DeleteDate` | Soft-delete timestamp |
 
-### Systemanforderungen
+Automatic hashes use configurable lengths of 4 to 8 characters by default.
+Custom hashes are limited to 16 characters and the configured letters, digits,
+hyphen, and underscore.
 
-- **PHP**: 8.3 oder höher
-- **Composer**: 2.0+
-- **Node.js**: 18+
-- **npm**: 9+
-- **Datenbank**: SQLite, MySQL oder PostgreSQL
+### Main services
 
-### PHP Extensions
+- `QrCodeGenerator` generates base64-encoded QR-code images. Supported formats
+  are PNG, GIF, SVG, and WebP.
+- `YouTubeConverter` recognizes YouTube watch and `youtu.be` URLs and converts
+  valid video IDs to `youtube-nocookie.com` embed URLs.
 
-- BCMath
-- Ctype
-- cURL
-- DOM
-- Fileinfo
-- Filter
-- Hash
-- Mbstring
-- OpenSSL
-- PCRE
-- PDO
-- Tokenizer
-- XML
+## Requirements
 
-## 🚀 Installation
+- PHP 8.3 or later and the extensions required by Laravel and the installed
+  Composer packages.
+- Composer 2.
+- Node.js and npm versions supported by the Vite version in `package.json`.
+- SQLite, MySQL, or PostgreSQL. SQLite is the default in `.env.example`.
 
-### 1. Repository klonen
+For production, use a supported PHP-FPM web server setup and point the web
+server's document root to the application's `public/` directory.
+
+## Installation
+
+### 1. Get the application
 
 ```bash
 git clone https://github.com/onkihara/shortener.git
 cd shortener
 ```
 
-### 2. Automatische Setup (empfohlen)
+### 2. Install PHP dependencies and configure the environment
+
+```bash
+composer install
+cp .env.example .env
+php artisan key:generate
+```
+
+On Windows, copy `.env.example` to `.env` using Explorer or:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Edit `.env` and set at least `APP_NAME`, `APP_URL`, and your database
+connection. Keep `APP_DEBUG=true` only for local development.
+
+### 3. Configure the database
+
+For SQLite, set `DB_CONNECTION=sqlite`. If the database file does not exist,
+create it before running migrations:
+
+```bash
+touch database/database.sqlite
+php artisan migrate
+```
+
+On Windows, create the file with:
+
+```powershell
+New-Item database/database.sqlite -ItemType File
+php artisan migrate
+```
+
+For MySQL or PostgreSQL, create a database and user, then set the relevant
+`DB_CONNECTION`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, and
+`DB_PASSWORD` values in `.env` before migrating:
+
+```bash
+php artisan migrate
+```
+
+### 4. Install and build front-end assets
+
+```bash
+npm install
+npm run build
+```
+
+### 5. Start the local application
+
+In one terminal, start Laravel:
+
+```bash
+php artisan serve
+```
+
+In another terminal, start Vite if you are working on front-end assets:
+
+```bash
+npm run dev
+```
+
+Open the URL printed by `php artisan serve` (typically
+`http://127.0.0.1:8000`).
+
+### Optional one-command setup
+
+The Composer `setup` script installs PHP and JavaScript dependencies, creates
+the environment file if needed, generates an application key, runs migrations,
+and builds assets:
 
 ```bash
 composer run setup
 ```
 
-Dieser Befehl führt folgendes aus:
-- Installiert PHP-Dependencies mit Composer
-- Kopiert `.env.example` zu `.env` (falls nicht vorhanden)
-- Generiert Application Key
-- Führt Datenbank-Migrationen aus
-- Installiert JavaScript-Dependencies
-- Kompiliert Frontend-Assets
+Review `.env` and configure the database before using this script. It runs
+migrations as part of setup.
 
-### 3. Manuelle Installation
+## Configuration
 
-Falls das automatische Setup nicht funktioniert:
+### Environment variables
 
-#### 3.1 PHP Dependencies installieren
-```bash
-composer install
-```
+The `.env.example` file contains the standard Laravel settings. Common values
+include:
 
-#### 3.2 Environment-Datei erstellen
-```bash
-cp .env.example .env
-```
-
-#### 3.3 Application Key generieren
-```bash
-php artisan key:generate
-```
-
-#### 3.4 Datenbank-Migrationen
-```bash
-# Mit SQLite
-php artisan migrate
-
-# Oder mit anderen Datenbanken (siehe Konfiguration)
-php artisan migrate --database=mysql
-```
-
-#### 3.5 JavaScript Dependencies
-```bash
-npm install
-```
-
-#### 3.6 Frontend Assets kompilieren
-```bash
-npm run build
-```
-
-### 4. Entwicklungsserver starten
-
-```bash
-composer run dev
-```
-
-Dieser Befehl startet:
-- Laravel Development Server (Port 8000)
-- Vite Development Server (Port 5173)
-- Asset Compilation Watcher
-
-Zugriff: `http://localhost:8000`
-
-## ⚙️ Konfiguration
-
-### Environment-Variablen (.env)
-
-#### Basis-Konfiguration
-```env
-APP_NAME=Shortener
+```dotenv
+APP_NAME="URL Shortener"
 APP_ENV=local
 APP_DEBUG=true
 APP_URL=http://localhost:8000
 
-# Sprach-Einstellungen
-APP_LOCALE=en
-APP_FALLBACK_LOCALE=en
-```
-
-#### Datenbank
-```env
-# SQLite (Standard)
 DB_CONNECTION=sqlite
 
-# MySQL
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=shortener
-DB_USERNAME=root
-DB_PASSWORD=
-
-# PostgreSQL
-DB_CONNECTION=pgsql
-DB_HOST=127.0.0.1
-DB_PORT=5432
-DB_DATABASE=shortener
-DB_USERNAME=postgres
-DB_PASSWORD=
-```
-
-#### Session
-```env
 SESSION_DRIVER=database
-SESSION_LIFETIME=120
-SESSION_ENCRYPT=false
-```
-
-#### Cache & Queue
-```env
 CACHE_STORE=database
 QUEUE_CONNECTION=database
 ```
 
-#### OAuth / Socialite (Blikk)
-```env
-BLIKK_CLIENT_ID=your_blikk_client_id
-BLIKK_CLIENT_SECRET=your_blikk_client_secret
-BLIKK_REDIRECT_URI=http://localhost:8000/oauth/callback
+For a network database, configure the connection-specific variables in `.env`.
+Do not commit `.env` or production credentials to source control.
+
+### Shortener options
+
+`config/shortener.php` controls hash generation, URL validation, descriptions,
+and pagination. Defaults include:
+
+- Hash lengths: 4, 5, 6, 7, and 8 characters, tried in order.
+- Maximum hash length: 16 characters.
+- Allowed URL schemes: HTTP, HTTPS, FTP, and FTPS.
+- Maximum URL and description length: 1,024 characters each.
+- Dashboard list page size: 15 links.
+
+After changing cached configuration in a deployed environment, rebuild the
+configuration cache:
+
+```bash
+php artisan config:cache
 ```
 
-### Shortener-Konfiguration (config/shortener.php)
+### OAuth sign-in with Laravel Socialite
+
+Laravel Socialite provides a consistent OAuth flow across supported identity
+providers. The application has `/oauth/login` and `/oauth/callback` routes for
+starting authentication and processing the provider response. Socialite
+credentials and redirect URIs should be supplied through environment variables
+and registered in `config/services.php`; do not place secrets in source code.
+
+A provider entry in `config/services.php` generally follows this pattern:
 
 ```php
-return [
-    'hash' => [
-        // Verfügbare Hash-Längen (wird der Reihe nach versucht)
-        'lengths' => [4, 5, 6, 7, 8],
-        
-        // Versuche pro Länge
-        'retrials' => 10,
-        
-        // Erlaubte Zeichen
-        'characters' => 'abcdefghijklmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789',
-    ]
-];
+'provider-name' => [
+    'client_id' => env('OAUTH_CLIENT_ID'),
+    'client_secret' => env('OAUTH_CLIENT_SECRET'),
+    'redirect' => env('OAUTH_REDIRECT_URI'),
+],
 ```
 
-## 💻 Verwendung
+The login and callback code must use the same Socialite driver name as the
+configuration entry. Set the OAuth application's callback URL to the
+application's `/oauth/callback` URL. Provider availability and supported user
+fields vary; a provider not included with Socialite may require a compatible
+community provider package. Configure such a provider before enabling sign-in.
 
-### Für Endbenutzer
+## Using the application
 
-#### Home-Seite
-- Öffnen Sie `http://localhost:8000/`
-- Nicht-authentifizierte Benutzer sehen die Landing Page
+### Web interface
 
-#### Anmeldung
-- Klicken Sie auf "Login"
-- Authentifizierung über Blikk OAuth
-- Automatische Weiterleitung zum Shortlink-Erstellungs-Formular
+- `/` displays the landing page to signed-out visitors and sends signed-in
+  users to the create-link page.
+- `/shortener/create` displays the link creation page.
+- `/shortener/dashboard` displays the signed-in user's dashboard.
+- `/oauth/login` starts OAuth sign-in; `/oauth/logout` signs out.
 
-#### Shortlink erstellen
-- Navigieren Sie zu `/shortener/create`
-- Ausfüllen des Formulars:
-  - **URL** (erforderlich): Die zu verkürzende URL
-  - **Custom Hash** (optional): Benutzerdefinierter Hash (z.B. "mein-link")
-  - **Beschreibung** (optional): Notiz/Beschreibung
-  - **Veröffentlichungsdatum** (optional): Wann der Link aktiv wird
-  - **Ablaufdatum** (optional): Wann der Link inaktiv wird
-- Shortlink wird generiert und angezeigt
-- QR-Code wird automatisch erstellt
+The short-link creation endpoint is also available to guests. Guest-created
+links are not associated with a user account and cannot be managed through the
+owner-only update and delete operations.
 
-#### Dashboard
-- Navigieren Sie zu `/shortener/dashboard`
-- Übersicht aller Ihrer Shortlinks
-- Statistiken (Zugriffszähler)
-- Optionen zum Bearbeiten/Löschen
+### Redirect behavior
 
-### Shortlink verwenden
-- Teilen Sie den generierten Short-URL: `example.com/{hash}`
-- Benutzer werden automatisch zur Ziel-URL weitergeleitet
-- Zugriffszähler wird erhöht
+Visit `https://your-domain.example/{hash}` to follow a short link. A published,
+unexpired link redirects to its destination and records an access. A link whose
+publication date is in the future returns HTTP 409; an expired link returns
+HTTP 410. Unknown and soft-deleted hashes return HTTP 404.
 
-## 🔌 API-Endpoints
+### Languages
 
-### Authentifizierung
-Alle API-Endpoints außer dem Redirect erfordern Authentication.
+The `POST /language` endpoint changes the locale stored in the current session.
+The requested locale must be among the locales configured by the application.
 
-### Öffentliche Endpoints
+## HTTP endpoints
 
-#### GET `/{hash}`
-Leitet zur ursprünglichen URL um.
+The JSON endpoints return a `success` boolean and either a `data` payload or an
+error message. Public endpoints are rate-limited to 30 requests per minute.
+Authenticated management endpoints use the Laravel session created at sign-in;
+they do not accept a bearer token by default.
 
-**Parameter:**
-- `hash` (string): Shortlink-Hash
+| Method | Path | Access | Purpose |
+| --- | --- | --- | --- |
+| `POST` | `/api/shorten` | Public | Create a short link |
+| `GET` | `/api/shorten?hash={hash}` | Public | Look up a published short link |
+| `POST` | `/api/qr-code` | Public | Generate a QR code |
+| `GET` | `/api/shorteners` | Signed in | List the current user's links |
+| `GET` | `/api/shorteners/{shortener}` | Signed in | Get a link's details |
+| `PATCH`, `PUT` | `/api/shorteners/{shortener}` | Owner | Update description or dates |
+| `DELETE` | `/api/shorteners/{shortener}` | Owner | Soft-delete a link |
 
-**Responses:**
-- `301`: Redirect zur Ziel-URL
-- `409`: Shortlink noch nicht veröffentlicht
-- `410`: Shortlink abgelaufen
-- `404`: Hash nicht gefunden
+The redirect route is `GET /{hash}`. The OAuth and locale routes are described
+above.
 
-**Beispiel:**
-```bash
-curl -L http://localhost:8000/abc123
-```
+### Create a short link
 
----
+`POST /api/shorten` accepts JSON or form input:
 
-### Authentifizierte Endpoints
-
-#### GET `/api/shorteners`
-Liste aller Shortlinks des aktuellen Benutzers.
-
-**Query Parameter:**
-- `page` (int): Seitennummer für Pagination
-- `per_page` (int): Einträge pro Seite
-
-**Response:**
 ```json
 {
-  "data": [
-    {
-      "ID": 1,
-      "Hash": "abc123",
-      "Url": "https://example.com/very/long/url",
-      "Description": "My first short link",
-      "Frequency": 42,
-      "PublishDate": "2024-01-01T00:00:00",
-      "ExpirationDate": null,
-      "CreationDate": "2024-01-01T00:00:00",
-      "UpdateDate": "2024-01-01T00:00:00"
-    }
-  ],
-  "pagination": {
-    "current_page": 1,
-    "last_page": 1,
-    "total": 1
-  }
+  "url": "https://example.com/a/long/path",
+  "hash": "my-link",
+  "description": "Optional note",
+  "publish_date": "2026-11-25 09:00",
+  "expiration_date": "2026-12-01 09:00:00"
 }
 ```
 
-**Beispiel:**
+`url` is required and must use HTTP, HTTPS, FTP, or FTPS. `hash` is optional;
+if omitted, a unique code is generated. Publication dates use the
+`Y-m-d H:i` format; expiration dates use `Y-m-d H:i:s`. When both dates are
+provided, expiration must not be earlier than publication. A successful
+response has HTTP 201 and includes the short link in `data.short_link`.
+
+Example:
+
 ```bash
-curl -H "Authorization: Bearer {token}" \
-  http://localhost:8000/api/shorteners?page=1&per_page=10
-```
-
----
-
-#### POST `/api/shorteners`
-Erstellt einen neuen Shortlink.
-
-**Body:**
-```json
-{
-  "url": "https://example.com/very/long/url",
-  "custom_hash": "mein-link",
-  "description": "Meine Beschreibung",
-  "publish_date": "2024-01-15T00:00:00",
-  "expiration_date": "2025-01-15T00:00:00"
-}
-```
-
-**Validierung:**
-- `url` (erforderlich): Gültige URL
-- `custom_hash` (optional): Eindeutiger, URL-sicherer String
-- `description` (optional): Max. 1024 Zeichen
-- `publish_date` (optional): Datetime string
-- `expiration_date` (optional): Datetime string
-
-**Response:**
-```json
-{
-  "ID": 2,
-  "Hash": "mein-link",
-  "Url": "https://example.com/very/long/url",
-  "Description": "Meine Beschreibung",
-  "Frequency": 0,
-  "PublishDate": "2024-01-15T00:00:00",
-  "ExpirationDate": "2025-01-15T00:00:00",
-  "CreationDate": "2024-01-10T12:00:00",
-  "UpdateDate": "2024-01-10T12:00:00",
-  "qr_code": "data:image/png;base64,..."
-}
-```
-
-**Beispiel:**
-```bash
-curl -X POST http://localhost:8000/api/shorteners \
-  -H "Authorization: Bearer {token}" \
-  -H "Content-Type: application/json" \
+curl -X POST http://127.0.0.1:8000/api/shorten \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json' \
   -d '{
-    "url": "https://example.com/very/long/url",
-    "custom_hash": "mein-link",
-    "description": "Test"
+    "url": "https://example.com/a/long/path",
+    "description": "Example link"
   }'
 ```
 
----
-
-#### PUT `/api/shorteners/{id}`
-Aktualisiert einen existierenden Shortlink.
-
-**Body:** Gleich wie POST (alle Felder optional)
-
-**Response:** Aktualisierter Shortlink (JSON)
-
-**Beispiel:**
-```bash
-curl -X PUT http://localhost:8000/api/shorteners/1 \
-  -H "Authorization: Bearer {token}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "description": "Updated description"
-  }'
-```
-
----
-
-#### DELETE `/api/shorteners/{id}`
-Löscht einen Shortlink (Soft Delete).
-
-**Response:** 
-```json
-{
-  "message": "Shortlink successfully deleted",
-  "ID": 1
-}
-```
-
-**Beispiel:**
-```bash
-curl -X DELETE http://localhost:8000/api/shorteners/1 \
-  -H "Authorization: Bearer {token}"
-```
-
----
-
-#### GET `/api/shorteners/{id}`
-Ruft Details eines einzelnen Shortlinks ab.
-
-**Response:** Shortlink-Objekt (JSON)
-
-**Beispiel:**
-```bash
-curl -H "Authorization: Bearer {token}" \
-  http://localhost:8000/api/shorteners/1
-```
-
----
-
-### OAuth Endpoints
-
-#### GET `/oauth/login`
-Leitet zur Blikk-Authentifizierung um.
-
-#### GET `/oauth/callback`
-OAuth Callback-Endpoint (wird automatisch von Blikk aufgerufen).
-
-#### POST `/oauth/logout`
-Meldet den aktuellen Benutzer ab.
-
----
-
-### Weitere Endpoints
-
-#### POST `/language`
-Wechselt die Sprache der Session.
-
-**Body:**
-```json
-{
-  "locale": "en" // oder "de", etc.
-}
-```
-
-**Response:**
-```json
-{
-  "message": "Locale updated successfully"
-}
-```
-
-## 🛠️ Entwicklung
-
-### Code-Stil
-
-Das Projekt verwendet **Laravel Pint** als Code-Formatter.
-
-#### Pint ausführen
-```bash
-# Aktuelle Änderungen formatieren
-vendor/bin/pint --dirty --format agent
-
-# Alle Dateien formatieren
-vendor/bin/pint
-
-# Prüfen ohne Änderungen
-vendor/bin/pint --test
-```
-
-### Datenbankmodifikationen
-
-#### Neue Migration erstellen
-```bash
-php artisan make:migration create_table_name
-```
-
-#### Migrationen ausführen
-```bash
-php artisan migrate
-```
-
-#### Rollback
-```bash
-# Letzter Batch
-php artisan migrate:rollback
-
-# Komplett zurücksetzen
-php artisan migrate:reset
-
-# Refresh mit Seeding
-php artisan migrate:refresh --seed
-```
-
-### Modelle erstellen
+### Look up a link
 
 ```bash
-# Model mit Factory und Migration
-php artisan make:model ModelName -mf
-
-# Mit Controller
-php artisan make:model ModelName -mcr
+curl -G http://127.0.0.1:8000/api/shorten \
+  --data-urlencode 'hash=abc123' \
+  -H 'Accept: application/json'
 ```
 
-### Artisan-Befehle
+The endpoint returns the destination URL and description for a published,
+unexpired link. It also increments the access count.
+
+### Manage links
+
+The following authenticated endpoints use the browser session established by
+OAuth sign-in. They are intended for the application's web client. The
+`GET /api/shorteners` endpoint supports an optional `search` query and returns
+paginated results.
+
+Updates accept `description`, `publish_date`, and `expiration_date`. Deletion
+is soft by default. To permanently delete a link, pass `hard=true` to the
+delete request. Only the authenticated owner can update or delete a link.
+
+### Generate a QR code
+
+`POST /api/qr-code` accepts `text` (required), plus optional `format`,
+`foreground_color`, `background_color`, and `size` fields. Formats are `png`,
+`gif`, `svg`, and `webp`; colors must be six-digit hexadecimal values, and size
+must be between 100 and 1,000 pixels. The response includes a base64 data URL.
+
+Example:
 
 ```bash
-# Alle verfügbaren Befehle
-php artisan list
-
-# Hilfe für einen Befehl
-php artisan {command} --help
-
-# Datenbank-Konfiguration prüfen
-php artisan config:show database.default
-
-# Cache löschen
-php artisan cache:clear
-php artisan config:clear
-php artisan view:clear
-
-# Datenbank-Schema anzeigen
-php artisan db:show
+curl -X POST http://127.0.0.1:8000/api/qr-code \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json' \
+  -d '{"text":"https://example.com/abc123","format":"png","size":300}'
 ```
 
-### Tinker REPL
+## Development and testing
 
-Interaktive PHP-Konsole mit Laravel-Kontext:
-
-```bash
-php artisan tinker
-
-# Oder direkter Befehl
-php artisan tinker --execute 'User::count();'
-```
-
-### IDE-Setup
-
-#### VS Code
-
-Die Datei `.vscode/settings.json` enthält Einstellungen für:
-- PHP Intelephense
-- Laravel Artisan
-- Tailwind CSS IntelliSense
-- Vite Helper
-
-#### Empfohlene Extensions
-
-- Laravel Extension Pack
-- Laravel Artisan
-- Tailwind CSS IntelliSense
-- Vite Helper
-- PHP Intelephense
-- Pest (PHP Testing)
-
-## 🧪 Testen
-
-Das Projekt verwendet **Pest** als Testing-Framework.
-
-### Tests ausführen
+### Run the tests
 
 ```bash
-# Alle Tests
 php artisan test
-
-# Mit kompaktem Output
-php artisan test --compact
-
-# Spezifische Test-Datei
-php artisan test tests/Feature/ShortenerTest.php
-
-# Spezifischen Test filtern
-php artisan test --filter=test_create_shortener
-
-# Mit Coverage
-php artisan test --coverage
-
-# Nur fehlgeschlagene Tests
-php artisan test --failed
 ```
 
-### Test-Struktur
+The test suite uses Pest. Existing tests cover shortener behavior, date
+handling, QR-code generation, localization, and YouTube URL conversion.
 
-```
-tests/
-├── Feature/
-│   ├── ShortenerTest.php          # Feature Tests für Shortener
-│   └── UserTest.php               # Feature Tests für User
-├── Unit/
-│   ├── Models/
-│   │   ├── ShortenerTest.php      # Unit Tests für Shortener Model
-│   │   └── UserTest.php           # Unit Tests für User Model
-│   └── Services/
-│       ├── QrCodeGeneratorTest.php
-│       └── YouTubeConverterTest.php
-└── Pest.php                       # Pest Konfiguration
-```
-
-### Neue Tests erstellen
+### Format PHP code
 
 ```bash
-# Feature Test
-php artisan make:test ShortenerTest
-
-# Unit Test
-php artisan make:test ShortenerTest --unit
-
-# Mit Pest
-php artisan make:test ShortenerTest --pest
+vendor/bin/pint --dirty --format agent
 ```
 
-### Test-Beispiel (Pest Syntax)
+### Useful Laravel commands
 
-```php
-<?php
-
-test('user can create shortener', function () {
-    $user = User::factory()->create();
-    
-    $response = $this->actingAs($user)
-        ->post('/api/shorteners', [
-            'url' => 'https://example.com/long/url',
-            'description' => 'Test',
-        ]);
-    
-    $response->assertStatus(201);
-    $this->assertDatabaseHas('shortcuts', [
-        'Url' => 'https://example.com/long/url',
-    ]);
-});
+```bash
+php artisan route:list
+php artisan migrate
+php artisan config:clear
+php artisan cache:clear
+php artisan view:clear
 ```
 
-## 🚀 Deployment
+## Production deployment
 
-### Vorbereitung
+The following is a general Laravel deployment outline. Adapt it to the hosting
+platform and its PHP, database, and web-server requirements.
 
-1. **Environment-Variablen**
-   ```bash
-   cp .env.example .env
-   # Passen Sie die Produktions-Einstellungen an
-   ```
+1. Provision a supported PHP runtime, required PHP extensions, a database, and
+   a web server. Configure the web root to point to `public/`.
+2. Set production environment variables securely. Use
+   `APP_ENV=production`, `APP_DEBUG=false`, a correct `APP_URL`, and production
+   database credentials.
+3. Install PHP dependencies and build the front-end assets:
 
-2. **Application Key**
-   ```bash
-   php artisan key:generate
-   ```
-
-3. **Dependencies installieren**
    ```bash
    composer install --no-dev --optimize-autoloader
-   npm install --omit=dev
-   ```
-
-4. **Frontend Assets kompilieren**
-   ```bash
+   npm ci
    npm run build
    ```
 
-5. **Migrationen ausführen**
+4. Generate `APP_KEY` once for the deployment environment if it has not
+   already been generated. Do not generate a new key on each release when
+   preserving encrypted application data.
+5. Run migrations during deployment:
+
    ```bash
    php artisan migrate --force
    ```
 
-6. **Cache vorbereiten**
+6. Cache production configuration and views:
+
    ```bash
    php artisan config:cache
    php artisan route:cache
    php artisan view:cache
    ```
 
-### Hosting-Optionen
+7. Ensure `storage/` and `bootstrap/cache/` are writable by the PHP process,
+   enable HTTPS, and verify that the application health and login flows work.
 
-#### Laravel Cloud (Empfohlen)
-```bash
-# Installation
-composer require laravel/cloud
+Do not copy the development `.env` file into a public directory or expose
+credentials in deployment logs. Select session, cache, queue, and mail
+backends appropriate for the hosting environment.
 
-# Deployment via Cloud CLI
-php artisan cloud:deploy
-```
+## Troubleshooting
 
-Siehe auch: [Laravel Cloud Dokumentation](https://cloud.laravel.com/)
+### Vite manifest is missing
 
-#### Shared Hosting
+Build the front-end assets, or run the Vite development server:
 
-1. Datei-Upload via FTP/SFTP
-2. SSH-Zugriff für Artisan-Befehle
-3. Datenbank-Setup (MySQL/PostgreSQL)
-4. `.env` Datei mit Produktions-Werten
-
-#### VPS/Dedicated Server
-
-1. PHP 8.3+ Installation
-2. Composer Installation
-3. Node.js Installation
-4. Git Setup für Deployment
-5. Reverse Proxy (Nginx/Apache)
-6. SSL-Zertifikat (Let's Encrypt)
-
-**Beispiel Nginx-Konfiguration:**
-```nginx
-server {
-    listen 80;
-    server_name shortener.example.com;
-
-    root /var/www/shortener/public;
-    index index.php;
-
-    location / {
-        try_files $uri $uri/ /index.php?$query_string;
-    }
-
-    location ~ \.php$ {
-        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
-        fastcgi_index index.php;
-        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
-        include fastcgi_params;
-    }
-
-    location ~ /\.(?!well-known).* {
-        deny all;
-    }
-}
-```
-
-### Umgebungs-Variablen (Produktion)
-
-```env
-APP_ENV=production
-APP_DEBUG=false
-APP_URL=https://shortener.example.com
-
-# Sichere DB-Verbindung
-DB_CONNECTION=mysql
-DB_HOST=db.example.com
-DB_DATABASE=shortener_prod
-DB_USERNAME=shortener_user
-DB_PASSWORD=secure_password_here
-
-# Redis für Cache/Sessions
-CACHE_STORE=redis
-SESSION_DRIVER=redis
-REDIS_HOST=redis.example.com
-REDIS_PASSWORD=redis_password
-
-# Mail-Konfiguration
-MAIL_MAILER=smtp
-MAIL_HOST=smtp.mailtrap.io
-MAIL_PORT=465
-MAIL_USERNAME=your_username
-MAIL_PASSWORD=your_password
-
-# OAuth-Secrets
-BLIKK_CLIENT_ID=prod_client_id
-BLIKK_CLIENT_SECRET=prod_client_secret
-```
-
-## 🐛 Troubleshooting
-
-### "Unable to locate file in Vite manifest"
-Frontend Assets nicht kompiliert:
 ```bash
 npm run build
-# Oder im Development Mode:
+# For local development:
 npm run dev
 ```
 
-### Database Connection Error
-Überprüfen Sie die Datenbank-Einstellungen in `.env`:
+### Database connection or missing-table errors
+
+Check the database settings in `.env`, ensure the database exists, and run:
+
 ```bash
-php artisan migrate --verbose
+php artisan migrate
 ```
 
-### Permission Denied
-Setzen Sie korrekte Verzeichnisrechte:
-```bash
-chmod -R 775 storage bootstrap/cache
-chown -R www-data:www-data /var/www/shortener
-```
+### OAuth callback errors
 
-### composer.lock Issues
-```bash
-# Lock-Datei neu erstellen
-rm composer.lock
-composer install
-```
+Verify that the provider credentials are configured in `config/services.php`,
+that the login and callback code use the configured Socialite driver, and that
+the callback URL registered with the identity provider exactly matches
+`APP_URL` plus `/oauth/callback`.
 
-### OAuth/Login Issues
-1. Überprüfen Sie BLIKK_* Umgebungsvariablen
-2. Validieren Sie Redirect URI in Blikk-Dashboard
-3. Prüfen Sie Browser-Cookies und LocalStorage
+### Storage permission errors
 
-## 📚 Weitere Ressourcen
+Grant the PHP process write access to `storage/` and `bootstrap/cache/`. Avoid
+making the entire project tree world-writable.
 
-- [Laravel Dokumentation](https://laravel.com/docs)
-- [Laravel Socialite](https://laravel.com/docs/socialite)
-- [Pest PHP](https://pestphp.com)
-- [Tailwind CSS](https://tailwindcss.com)
-- [Vue.js](https://vuejs.org)
-- [Vite](https://vitejs.dev)
+## License
 
-## 📄 Lizenz
-
-Dieses Projekt ist unter der MIT-Lizenz lizenziert. Siehe [LICENSE](LICENSE) Datei für Details.
-
-## 👤 Autor
-
-**Entwickelt von:** onkihara
-
-**Kontakt:** Siehe GitHub-Profil
+This project is licensed under the [MIT License](LICENSE).
 
 ---
 
-## 🤝 Beitragen
-
-Beiträge sind willkommen! Bitte erstellen Sie einen Fork und einen Pull Request mit Ihren Verbesserungen.
-
-### Development-Workflow
-
-1. Fork das Repository
-2. Feature-Branch erstellen: `git checkout -b feature/AmazingFeature`
-3. Änderungen committen: `git commit -m 'Add AmazingFeature'`
-4. Branch pushen: `git push origin feature/AmazingFeature`
-5. Pull Request öffnen
-
-### Anforderungen für PR
-
-- Code mit Pint formatieren: `vendor/bin/pint --dirty`
-- Tests schreiben/aktualisieren: `php artisan test`
-- Dokumentation aktualisieren
-- Aussagekräftige Commit-Messages
-
----
-
-**Zuletzt aktualisiert:** 2024
-
-Viel Spaß mit dem URL Shortener! 🚀
+Last updated: November 2026
