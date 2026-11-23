@@ -27,7 +27,7 @@ jobs:
       TARGET_UID: 82
       TARGET_GID: 82
       DEPLOY_PATH: /apps/www/shortener
-      APP_PATH: tools/dobble
+      APP_PATH: shortener
       DEPLOY_OPTIMIZE_URL: https://s.blikk.it/shortener_optimize.php
 
     steps:
@@ -45,7 +45,7 @@ jobs:
         run: |
           mkdir bootstrap/cache
           mkdir -p storage/framework/views
-          touch database/database.sqlite
+      # touch database/database.sqlite
 
       - name: Install production Composer dependencies
         run: composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
