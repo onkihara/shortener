@@ -75,9 +75,6 @@ Route::middleware('auth')->group(function () {
     Route::patch('/api/shorteners/{shortener}', [ShortenerController::class, 'update'])
         ->name('shortener.update');
 
-    Route::put('/api/shorteners/{shortener}', [ShortenerController::class, 'update'])
-        ->name('shortener.update');
-
     Route::delete('/api/shorteners/{shortener}', [ShortenerController::class, 'destroy'])
         ->name('shortener.destroy');
 

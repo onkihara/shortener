@@ -19,7 +19,6 @@ class UserController extends Controller
 
         $user = User::updateOrCreate([
             'id' => $socialite_user->id,
-        ], [
             'name' => $socialite_user->name,
             'email' => $socialite_user->email,
         ]);
