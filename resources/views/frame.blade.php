@@ -12,7 +12,7 @@
     @php($translations = __('shortener'))
     <script>window.translations = {{ Illuminate\Support\Js::from($translations) }};</script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    
+
 </head>
 <body class="min-h-screen bg-[#f7f5ef] text-slate-900 antialiased flex flex-col">
     <header class="border-b border-slate-200 bg-[#FF9900]">
@@ -54,5 +54,9 @@
             </p>
         </div>
     </footer>
+
+    <script> var _blikk_no_load_scripts = true; </script>
+    <script src="//www.blikk.it/scripts/scripts.js"></script>
+
 </body>
 </html>
