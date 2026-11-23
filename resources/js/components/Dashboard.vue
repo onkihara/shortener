@@ -20,12 +20,12 @@
       />
 
       <SearchBar 
-        v-if="shorteners.length > 0"
+        v-if="shorteners.length > 0 || !isInitialLoad"
         v-model="searchQuery"
         @update:model-value="handleSearch"
       />
 
-      <LoadingSpinner v-if="isLoading" />
+      <LoadingSpinner v-if="isInitialLoad && isLoading" />
 
       <ShortenerTable 
         v-else-if="shorteners.length > 0"
@@ -108,6 +108,7 @@ const searchQuery = ref('')
 const errorMessage = ref('')
 const successMessage = ref('')
 const isLoading = ref(false)
+const isInitialLoad = ref(true)
 const currentPage = ref(1)
 const editingItem = ref(null)
 const editErrorMessage = ref('')
@@ -155,6 +156,7 @@ const loadShorteners = async () => {
     errorMessage.value = t('load_error', { message: error.message })
   } finally {
     isLoading.value = false
+    isInitialLoad.value = false
   }
 }
 
